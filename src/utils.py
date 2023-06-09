@@ -8,6 +8,8 @@ APP_ENV = 'APP_ENV'
 SECRET_KEY = 'SECRET_KEY'
 MONGODB_USR_NAME = 'MONGODB_USR_NAME'
 MONGODB_USR_PWD = 'MONGODB_USR_PWD'
+BASIC_AUTH_USR = 'BASIC_AUTH_USR'
+BASIC_AUTH_PWD = 'BASIC_AUTH_PWD'
 
 
 # utility Functions
@@ -29,6 +31,12 @@ def validate_input():
 
     if os.getenv(MONGODB_USR_PWD) is None:
         missing_variables.append(MONGODB_USR_PWD)
+
+    if os.getenv(BASIC_AUTH_USR) is None:
+        missing_variables.append(BASIC_AUTH_USR)
+
+    if os.getenv(BASIC_AUTH_PWD) is None:
+        missing_variables.append(BASIC_AUTH_PWD)
 
     if len(missing_variables) != 0:
         raise ValueError('The following env variables are missing: {}'.format(missing_variables))

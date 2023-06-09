@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import users as users_api
+import env_props as env_props_api
 import utils as utils
 
 
@@ -35,6 +36,7 @@ app.add_middleware(
 )
 
 app.include_router(users_api.router)
+app.include_router(env_props_api.router)
 
 
 @app.get('/authenv-service/tests/ping', tags=['Main'], summary='Ping Application')
