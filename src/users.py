@@ -138,7 +138,7 @@ def __insert_user_details(request, user_details_input: UserDetailsInput):
     hashed_password = bcrypt.hashpw(user_details_input.password.encode('utf-8'), bcrypt.gensalt())
     user_details_input.password = hashed_password
     try:
-        mongo_collection.insert_one(jsonable_encoder(user_details_input))
+        mongo_collection.insert_one(jsonable_encoder(user_details_input, exclude_none=True))
     except PyMongoError as ex:
         raise HTTPException(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail={'msg': f'Error inserting user: {user_details_input.username}', 'errMsg': str(ex)})
