@@ -17,7 +17,7 @@ from pymongo.errors import PyMongoError
 from utils import SECRET_KEY
 
 router = APIRouter(
-    prefix="/authenv-service",
+    prefix="/authenv-service/auth-users",
     tags=["Users"],
 )
 
