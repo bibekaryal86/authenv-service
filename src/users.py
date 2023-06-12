@@ -174,7 +174,8 @@ def __encode_token(username, source_ip):
 
 def __decode_token(http_auth_credentials: HTTPAuthorizationCredentials):
     try:
-        token_claims = jwt.decode(jwt=http_auth_credentials.credentials, key=os.getenv(SECRET_KEY), algorithms=['HS256'])
+        token_claims = jwt.decode(jwt=http_auth_credentials.credentials, key=os.getenv(SECRET_KEY),
+                                  algorithms=['HS256'])
         return token_claims.get('username')
     except PyJWTError as ex:
         raise HTTPException(status_code=http.HTTPStatus.FORBIDDEN,
