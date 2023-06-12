@@ -9,8 +9,7 @@ from pydantic import parse_obj_as
 from pydantic.class_validators import Optional
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
-
-from src.security import http_bearer_security, encode_http_auth_credentials, validate_http_auth_credentials
+from utils import http_bearer_security, encode_http_auth_credentials, validate_http_auth_credentials
 
 router = APIRouter(
     prefix="/authenv-service/auth-users",

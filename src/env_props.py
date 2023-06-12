@@ -8,8 +8,7 @@ from pydantic import parse_obj_as
 from pydantic.class_validators import Optional
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
-
-from src.security import http_basic_security, validate_http_basic_credentials
+from utils import http_basic_security, validate_http_basic_credentials
 
 router = APIRouter(
     prefix="/authenv-service/env-props",

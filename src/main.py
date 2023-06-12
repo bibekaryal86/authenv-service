@@ -5,11 +5,11 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.security import HTTPBasicCredentials
+from utils import http_basic_security, validate_http_basic_credentials
 
 import env_props as env_props_api
 import users as users_api
 import utils as utils
-from src.security import http_basic_security, validate_http_basic_credentials
 
 
 @asynccontextmanager
