@@ -1,27 +1,21 @@
 import http
-import os
-from datetime import datetime, timedelta
 
 import bcrypt
-import jwt
 from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.encoders import jsonable_encoder
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jwt import PyJWTError
+from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from pydantic import parse_obj_as
 from pydantic.class_validators import Optional
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 
-from utils import SECRET_KEY
+from src.security import http_bearer_security, encode_http_auth_credentials, validate_http_auth_credentials
 
 router = APIRouter(
     prefix="/authenv-service/auth-users",
     tags=["Users"],
 )
-
-security = HTTPBearer()
 
 
 class UserDetailsOutput(BaseModel):
@@ -62,7 +56,7 @@ class LoginResponse(BaseModel):
 @router.post("/login", response_model=LoginResponse, status_code=http.HTTPStatus.OK)
 def login(request: Request, login_request: LoginRequest):
     user_details = __get_user_details(request=request, username=login_request.username, password=login_request.password)
-    token = __encode_token(username=login_request.username, source_ip=request.client.host)
+    token = encode_http_auth_credentials(username=login_request.username, source_ip=request.client.host)
     return LoginResponse(token=token, user_details=user_details)
 
 
@@ -78,21 +72,20 @@ def insert(request: Request, username: str, user_details_request: UserDetailsReq
 
 @router.put("/{username}", response_model=UserDetailsResponse, status_code=http.HTTPStatus.OK)
 def update(request: Request, username: str, user_details_request: UserDetailsRequest,
-           credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token_username = __decode_token(credentials)
-    if not username == token_username == user_details_request.user_details.username:
+           http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
+    validate_http_auth_credentials(http_auth_credentials, username)
+    if not username == user_details_request.user_details.username:
         raise HTTPException(status_code=http.HTTPStatus.BAD_REQUEST,
                             detail='Invalid Request! Invalid Username!! Please try again!!!')
+
     __update_user_details(request=request, user_details_input=user_details_request.user_details)
     return UserDetailsResponse(detail='Update Successful!')
 
 
 @router.get("/{username}", response_model=LoginResponse, status_code=http.HTTPStatus.OK)
-def find(request: Request, username: str, http_auth_credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token_username = __decode_token(http_auth_credentials)
-    if not username == token_username:
-        raise HTTPException(status_code=http.HTTPStatus.BAD_REQUEST,
-                            detail='Invalid Request! Invalid User!! Please try again!!!')
+def find(request: Request, username: str,
+         http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
+    validate_http_auth_credentials(http_auth_credentials, username)
     user_details = __find_user_by_username(request=request, username=username)
     return LoginResponse(user_details=user_details, token=http_auth_credentials.credentials)
 
@@ -161,22 +154,3 @@ def __update_user_details(request, user_details_input: UserDetailsInput):
     except PyMongoError as ex:
         raise HTTPException(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
                             detail={'msg': f'Error updating user: {user_details_input.username}', 'errMsg': str(ex)})
-
-
-def __encode_token(username, source_ip):
-    token_claim = {
-        'username': username,
-        'source_ip': source_ip,
-        'exp': datetime.utcnow() + timedelta(hours=24)
-    }
-    return jwt.encode(payload=token_claim, key=os.getenv(SECRET_KEY), algorithm='HS256')
-
-
-def __decode_token(http_auth_credentials: HTTPAuthorizationCredentials):
-    try:
-        token_claims = jwt.decode(jwt=http_auth_credentials.credentials, key=os.getenv(SECRET_KEY),
-                                  algorithms=['HS256'])
-        return token_claims.get('username')
-    except PyJWTError as ex:
-        raise HTTPException(status_code=http.HTTPStatus.FORBIDDEN,
-                            detail={'msg': 'Invalid Credentials!', 'errMsg': str(ex)})
