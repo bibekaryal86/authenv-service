@@ -73,7 +73,9 @@ def __gateway(request: Request, appname: str, path: str):
                             detail=f'Error! Route for {appname} Not Found!! Please Try Again!!!')
 
     query_params = str(request.query_params)
-    outgoing_url = base_url + '/' + appname + '/' + path + '?' + query_params
+    outgoing_url = base_url + '/' + appname + '/' + path if len(query_params) is 0 \
+        else base_url + '/' + appname + '/' + path + '?' + query_params
+
     print(outgoing_url)
     return {'gateway': 'successful'}
 
