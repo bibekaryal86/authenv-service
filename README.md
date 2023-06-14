@@ -7,6 +7,7 @@ http://localhost:8080/authenv-service/docs
 flake8
 pytest
 tox
+scheduler for set/reset cache
 
 # steps
 * navigate to project's root
