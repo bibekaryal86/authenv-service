@@ -50,16 +50,14 @@ def tests_ping():
 
 
 @app.get('/authenv-service/tests/reset', tags=['Main'], summary='Reset Cache')
-def tests_reset(request: Request, http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    validate_http_basic_credentials(http_basic_credentials)
+def tests_reset(request: Request):
     gateway_api.set_env_details(request=request, force_reset=True)
     return {'reset': 'successful'}
 
 
 @app.get("/authenv-service/docs", include_in_schema=False)
 async def custom_docs_url(req: Request, http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    if utils.is_production():
-        validate_http_basic_credentials(http_basic_credentials)
+    validate_http_basic_credentials(http_basic_credentials)
     root_path = req.scope.get("root_path", "").rstrip("/")
     openapi_url = root_path + app.openapi_url
     return get_swagger_ui_html(openapi_url=openapi_url, title=app.title)

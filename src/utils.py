@@ -95,13 +95,15 @@ def encode_http_auth_credentials(username, source_ip):
     return jwt.encode(payload=token_claim, key=os.getenv(SECRET_KEY), algorithm='HS256')
 
 
-def validate_http_auth_credentials(http_auth_credentials: HTTPAuthorizationCredentials, username: str):
+def validate_http_auth_credentials(http_auth_credentials: HTTPAuthorizationCredentials, username: str = None):
     try:
         token_claims = jwt.decode(jwt=http_auth_credentials.credentials, key=os.getenv(SECRET_KEY),
                                   algorithms=['HS256'])
         token_username = token_claims.get('username')
 
-        if token_username == username:
+        if username is None:
+            return token_username
+        elif username == token_username:
             return token_username
 
         raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED,

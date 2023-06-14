@@ -2,10 +2,10 @@ import http
 import os
 
 from fastapi import APIRouter, Request, Depends, HTTPException
-from fastapi.security import HTTPBasicCredentials
+from fastapi.security import HTTPAuthorizationCredentials
 
 from env_props import EnvDetails, find
-from utils import http_basic_security, validate_http_basic_credentials, APP_ENV, GATEWAY_BASE_URLS
+from utils import http_bearer_security, validate_http_auth_credentials, APP_ENV, GATEWAY_BASE_URLS
 
 router = APIRouter(
     prefix='/gateway',
@@ -32,36 +32,36 @@ def gateway_options(appname: str, path: str):
 
 @router.get('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
 def gateway_get(request: Request, appname: str, path: str,
-                http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    validate_http_basic_credentials(http_basic_credentials)
+                http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
+    validate_http_auth_credentials(http_auth_credentials)
     return __gateway(request=request, appname=appname, path=path)
 
 
 @router.post('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
 def gateway_post(request: Request, appname: str, path: str,
-                 http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    validate_http_basic_credentials(http_basic_credentials)
+                 http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
+    validate_http_auth_credentials(http_auth_credentials)
     return __gateway(request=request, appname=appname, path=path)
 
 
 @router.put('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
 def gateway_put(request: Request, appname: str, path: str,
-                http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    validate_http_basic_credentials(http_basic_credentials)
+                http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
+    validate_http_auth_credentials(http_auth_credentials)
     return __gateway(request=request, appname=appname, path=path)
 
 
 @router.patch('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
 def gateway_patch(request: Request, appname: str, path: str,
-                  http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    validate_http_basic_credentials(http_basic_credentials)
+                  http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
+    validate_http_auth_credentials(http_auth_credentials)
     return __gateway(request=request, appname=appname, path=path)
 
 
 @router.delete('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
 def gateway_delete(request: Request, appname: str, path: str,
-                   http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    validate_http_basic_credentials(http_basic_credentials)
+                   http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
+    validate_http_auth_credentials(http_auth_credentials)
     return __gateway(request=request, appname=appname, path=path)
 
 

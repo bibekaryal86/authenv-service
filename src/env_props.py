@@ -2,14 +2,14 @@ import http
 
 from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.encoders import jsonable_encoder
-from fastapi.security import HTTPBasicCredentials
+from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from pydantic import parse_obj_as
 from pydantic.class_validators import Optional
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 
-from utils import http_basic_security, validate_http_basic_credentials
+from utils import http_bearer_security, validate_http_auth_credentials
 
 router = APIRouter(
     prefix="/authenv-service/env-props",
@@ -29,25 +29,26 @@ class EnvDetailsResponse(BaseModel):
 
 
 @router.get("/{appname}", response_model=list[EnvDetails], status_code=http.HTTPStatus.OK)
-def find(request: Request, appname: str, http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security),
+def find(request: Request, appname: str,
+         http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security),
          is_validate_credentials: bool = True):
     if is_validate_credentials:
-        validate_http_basic_credentials(http_basic_credentials)
+        validate_http_auth_credentials(http_auth_credentials)
     return __find_env_details(request, app_name=appname)
 
 
 @router.post("/{appname}", response_model=EnvDetailsResponse, status_code=http.HTTPStatus.CREATED)
 def save(request: Request, appname: str, env_detail: EnvDetails,
-         http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    validate_http_basic_credentials(http_basic_credentials)
+         http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
+    validate_http_auth_credentials(http_auth_credentials)
     __save_env_details(request=request, app_name=appname, env_detail=env_detail)
     return EnvDetailsResponse(msg='Saved Successfully!')
 
 
 @router.delete("/{appname}/{propname}", response_model=EnvDetailsResponse, status_code=http.HTTPStatus.ACCEPTED)
 def remove(request: Request, appname: str, propname: str,
-           http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    validate_http_basic_credentials(http_basic_credentials)
+           http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
+    validate_http_auth_credentials(http_auth_credentials)
     __remove_env_details(request=request, app_name=appname, prop_name=propname)
     return EnvDetailsResponse(msg='Removed Successfully')
 
