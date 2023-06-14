@@ -5,11 +5,12 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.security import HTTPBasicCredentials
-from utils import http_basic_security, validate_http_basic_credentials
 
 import env_props as env_props_api
+import gateway as gateway_api
 import users as users_api
 import utils as utils
+from utils import http_basic_security, validate_http_basic_credentials
 
 
 @asynccontextmanager
@@ -40,11 +41,19 @@ app.add_middleware(
 
 app.include_router(users_api.router)
 app.include_router(env_props_api.router)
+app.include_router(gateway_api.router)
 
 
 @app.get('/authenv-service/tests/ping', tags=['Main'], summary='Ping Application')
 def tests_ping():
     return {'test': 'successful'}
+
+
+@app.get('/authenv-service/tests/reset', tags=['Main'], summary='Reset Cache')
+def tests_reset(request: Request, http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
+    validate_http_basic_credentials(http_basic_credentials)
+    gateway_api.set_env_details(request=request, force_reset=True)
+    return {'reset': 'successful'}
 
 
 @app.get("/authenv-service/docs", include_in_schema=False)

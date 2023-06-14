@@ -9,6 +9,7 @@ from pydantic import parse_obj_as
 from pydantic.class_validators import Optional
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
+
 from utils import http_bearer_security, encode_http_auth_credentials, validate_http_auth_credentials
 
 router = APIRouter(
@@ -145,7 +146,7 @@ def __update_user_details(request, user_details_input: UserDetailsInput):
 
     try:
         update_result = mongo_collection.update_one({'username': user_details_input.username},
-                                                    {"$set": jsonable_encoder(obj=user_details_input,
+                                                    {'$set': jsonable_encoder(obj=user_details_input,
                                                                               exclude_none=True)})
         if update_result.modified_count == 0:
             raise HTTPException(status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,

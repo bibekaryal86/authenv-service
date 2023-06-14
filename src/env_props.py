@@ -8,6 +8,7 @@ from pydantic import parse_obj_as
 from pydantic.class_validators import Optional
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
+
 from utils import http_basic_security, validate_http_basic_credentials
 
 router = APIRouter(
@@ -28,8 +29,10 @@ class EnvDetailsResponse(BaseModel):
 
 
 @router.get("/{appname}", response_model=list[EnvDetails], status_code=http.HTTPStatus.OK)
-def find(request: Request, appname: str, http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    validate_http_basic_credentials(http_basic_credentials)
+def find(request: Request, appname: str, http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security),
+         is_validate_credentials: bool = True):
+    if is_validate_credentials:
+        validate_http_basic_credentials(http_basic_credentials)
     return __find_env_details(request, app_name=appname)
 
 
