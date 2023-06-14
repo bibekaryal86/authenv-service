@@ -26,11 +26,6 @@ GATEWAY_ROUTE_PATHS = 'routePaths'
 GATEWAY_BASE_URLS = 'baseUrls_{}'
 
 
-# utility functions
-def is_production():
-    return os.getenv(APP_ENV) == 'production'
-
-
 # startup
 def validate_input():
     missing_variables = []
@@ -114,3 +109,8 @@ def validate_http_auth_credentials(http_auth_credentials: HTTPAuthorizationCrede
     except PyJWTError as ex:
         raise HTTPException(status_code=http.HTTPStatus.FORBIDDEN,
                             detail={'msg': 'Invalid Credentials!', 'errMsg': str(ex)})
+
+
+# other utility functions
+def is_production():
+    return os.getenv(APP_ENV) == 'production'
