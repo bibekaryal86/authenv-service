@@ -3,14 +3,15 @@ import http
 import bcrypt
 from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.encoders import jsonable_encoder
-from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBasicCredentials
 from pydantic import BaseModel, Field
 from pydantic import parse_obj_as
 from pydantic.class_validators import Optional
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 
-from utils import http_bearer_security, encode_http_auth_credentials, validate_http_auth_credentials
+from utils import http_bearer_security, encode_http_auth_credentials, validate_http_auth_credentials, \
+    http_basic_security, validate_http_basic_credentials
 
 router = APIRouter(
     prefix="/authenv-service/auth-users",
@@ -61,7 +62,9 @@ def login(request: Request, login_request: LoginRequest):
 
 
 @router.post("/{username}", response_model=UserDetailsResponse, status_code=http.HTTPStatus.OK)
-def insert(request: Request, username: str, user_details_request: UserDetailsRequest):
+def insert(request: Request, username: str, user_details_request: UserDetailsRequest,
+           http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
+    validate_http_basic_credentials(http_basic_credentials)
     if not username == user_details_request.user_details.username or not user_details_request.user_details.password:
         raise HTTPException(status_code=http.HTTPStatus.BAD_REQUEST,
                             detail='Invalid Request! Invalid User/Password!! Please try again!!!')

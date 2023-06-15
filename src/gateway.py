@@ -1,14 +1,40 @@
 import http
 import os
+import random
+from typing import Callable
 
-from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Response
+from fastapi.routing import APIRoute
 from fastapi.security import HTTPAuthorizationCredentials
 
 from env_props import EnvDetails, find
-from utils import http_bearer_security, validate_http_auth_credentials, APP_ENV, GATEWAY_BASE_URLS
+from utils import validate_http_auth_credentials, APP_ENV, GATEWAY_BASE_URLS
+
+
+class GatewayAPIRoute(APIRoute):
+    def get_route_handler(self) -> Callable:
+        original_route_handler = super().get_route_handler()
+
+        async def log_auth_filter_handler(request: Request) -> Response:
+            request.state.trace_int = random.randint(1000, 9999)
+            if request.method != http.HTTPMethod.OPTIONS:
+                print(
+                    '[ {} ] | REQUEST::: Incoming: [ {} ] | Method: [ {} ]'.format(request.state.trace_int, request.url,
+                                                                                   request.method))
+                auth_header = request.headers.get('Authorization')
+                access_token = auth_header.split()
+                http_auth_credentials = HTTPAuthorizationCredentials(scheme=access_token[0],
+                                                                     credentials=access_token[1])
+                validate_http_auth_credentials(http_auth_credentials)
+
+            return await original_route_handler(request)
+
+        return log_auth_filter_handler
+
 
 router = APIRouter(
     prefix='/gateway',
+    route_class=GatewayAPIRoute,
     include_in_schema=False,
     tags=["Gateway"]
 )
@@ -31,37 +57,27 @@ def gateway_options(appname: str, path: str):
 
 
 @router.get('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
-def gateway_get(request: Request, appname: str, path: str,
-                http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
-    validate_http_auth_credentials(http_auth_credentials)
+def gateway_get(request: Request, appname: str, path: str):
     return __gateway(request=request, appname=appname, path=path)
 
 
 @router.post('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
-def gateway_post(request: Request, appname: str, path: str,
-                 http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
-    validate_http_auth_credentials(http_auth_credentials)
+def gateway_post(request: Request, appname: str, path: str):
     return __gateway(request=request, appname=appname, path=path)
 
 
 @router.put('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
-def gateway_put(request: Request, appname: str, path: str,
-                http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
-    validate_http_auth_credentials(http_auth_credentials)
+def gateway_put(request: Request, appname: str, path: str):
     return __gateway(request=request, appname=appname, path=path)
 
 
 @router.patch('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
-def gateway_patch(request: Request, appname: str, path: str,
-                  http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
-    validate_http_auth_credentials(http_auth_credentials)
+def gateway_patch(request: Request, appname: str, path: str):
     return __gateway(request=request, appname=appname, path=path)
 
 
 @router.delete('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
-def gateway_delete(request: Request, appname: str, path: str,
-                   http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
-    validate_http_auth_credentials(http_auth_credentials)
+def gateway_delete(request: Request, appname: str, path: str):
     return __gateway(request=request, appname=appname, path=path)
 
 
@@ -73,10 +89,10 @@ def __gateway(request: Request, appname: str, path: str):
                             detail=f'Error! Route for {appname} Not Found!! Please Try Again!!!')
 
     query_params = str(request.query_params)
-    outgoing_url = base_url + '/' + appname + '/' + path if len(query_params) is 0 \
+    outgoing_url = base_url + '/' + appname + '/' + path if len(query_params) == 0 \
         else base_url + '/' + appname + '/' + path + '?' + query_params
 
-    print(outgoing_url)
+    print('[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]'.format(request.state.trace_int, outgoing_url, 200))
     return {'gateway': 'successful'}
 
 

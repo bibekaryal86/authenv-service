@@ -109,7 +109,7 @@ def validate_http_auth_credentials(http_auth_credentials: HTTPAuthorizationCrede
         raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED,
                             detail={'msg': 'Invalid Credentials!', 'errMsg': 'Invalid Credentials!'})
     except PyJWTError as ex:
-        raise HTTPException(status_code=http.HTTPStatus.FORBIDDEN,
+        raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED,
                             detail={'msg': 'Invalid Credentials!', 'errMsg': str(ex)})
 
 
