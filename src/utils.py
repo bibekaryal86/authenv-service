@@ -2,10 +2,9 @@ import http
 import os
 import secrets
 from datetime import datetime, timedelta
-from http import HTTPStatus
 
 import jwt
-from fastapi import FastAPI
+from fastapi import FastAPI, Header
 from fastapi import HTTPException
 from fastapi.security import HTTPBasic, HTTPBearer, HTTPBasicCredentials, HTTPAuthorizationCredentials
 from jwt import PyJWTError
@@ -83,7 +82,8 @@ def validate_http_basic_credentials(http_basic_credentials: HTTPBasicCredentials
     is_correct_username = secrets.compare_digest(valid_username.encode('utf-8'), input_username.encode('utf-8'))
     is_correct_password = secrets.compare_digest(valid_password.encode('utf-8'), input_password.encode('utf-8'))
     if not (is_correct_username and is_correct_password):
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail='Invalid Credentials!')
+        raise_http_exception(status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials',
+                             err_msg='Basic Credentials')
 
 
 def encode_http_auth_credentials(username, source_ip):
@@ -106,13 +106,26 @@ def validate_http_auth_credentials(http_auth_credentials: HTTPAuthorizationCrede
         elif username == token_username:
             return token_username
 
-        raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED,
-                            detail={'msg': 'Invalid Credentials!', 'errMsg': 'Invalid Credentials!'})
+        raise_http_exception(status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials',
+                             err_msg='Bearer Credentials')
     except PyJWTError as ex:
-        raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED,
-                            detail={'msg': 'Invalid Credentials!', 'errMsg': str(ex)})
+        raise_http_exception(status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials', err_msg=str(ex))
+
+
+def validate_request_header_auth(auth_header: Header):
+    if auth_header is None:
+        raise_http_exception(status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials',
+                             err_msg='Missing Credentials')
+    access_token = auth_header.split()
+    http_auth_credentials = HTTPAuthorizationCredentials(scheme=access_token[0],
+                                                         credentials=access_token[1])
+    validate_http_auth_credentials(http_auth_credentials)
 
 
 # other utility functions
 def is_production():
     return os.getenv(APP_ENV) == 'production'
+
+
+def raise_http_exception(status_code: http.HTTPStatus, msg: str, err_msg: str = ''):
+    raise HTTPException(status_code=status_code, detail={'msg': msg, 'errMsg': err_msg})

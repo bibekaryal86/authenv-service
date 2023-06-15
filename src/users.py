@@ -1,7 +1,7 @@
 import http
 
 import bcrypt
-from fastapi import APIRouter, Request, HTTPException, Depends
+from fastapi import APIRouter, Request, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBasicCredentials
 from pydantic import BaseModel, Field
@@ -11,7 +11,7 @@ from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 
 from utils import http_bearer_security, encode_http_auth_credentials, validate_http_auth_credentials, \
-    http_basic_security, validate_http_basic_credentials
+    http_basic_security, validate_http_basic_credentials, raise_http_exception
 
 router = APIRouter(
     prefix="/authenv-service/auth-users",
@@ -66,8 +66,8 @@ def insert(request: Request, username: str, user_details_request: UserDetailsReq
            http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
     validate_http_basic_credentials(http_basic_credentials)
     if not username == user_details_request.user_details.username or not user_details_request.user_details.password:
-        raise HTTPException(status_code=http.HTTPStatus.BAD_REQUEST,
-                            detail='Invalid Request! Invalid User/Password!! Please try again!!!')
+        raise_http_exception(status_code=http.HTTPStatus.BAD_REQUEST,
+                             msg='Invalid Request!', err_msg='Invalid User and/or Password!')
 
     __insert_user_details(request=request, user_details_input=user_details_request.user_details)
     return UserDetailsResponse(detail='Insert Successful!')
@@ -78,8 +78,8 @@ def update(request: Request, username: str, user_details_request: UserDetailsReq
            http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
     validate_http_auth_credentials(http_auth_credentials, username)
     if not username == user_details_request.user_details.username:
-        raise HTTPException(status_code=http.HTTPStatus.BAD_REQUEST,
-                            detail='Invalid Request! Invalid Username!! Please try again!!!')
+        raise_http_exception(status_code=http.HTTPStatus.BAD_REQUEST,
+                             msg='Invalid Request!', err_msg='Invalid Username!')
 
     __update_user_details(request=request, user_details_input=user_details_request.user_details)
     return UserDetailsResponse(detail='Update Successful!')
@@ -103,14 +103,15 @@ def __user_details_collection(request: Request):
 def __find_user_by_username(request, username, is_include_password=False):
     mongo_collection: Collection = __user_details_collection(request)
 
+    user_details = None
     try:
         user_details = mongo_collection.find_one({'username': username})
     except PyMongoError as ex:
-        raise HTTPException(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-                            detail={'msg': f'Error retrieving user: {username}', 'errMsg': str(ex)})
+        raise_http_exception(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
+                             msg=f'Error retrieving user: {username}', err_msg=str(ex))
 
     if user_details is None:
-        raise HTTPException(status_code=http.HTTPStatus.NOT_FOUND, detail=f'User not found: {username}')
+        raise_http_exception(status_code=http.HTTPStatus.NOT_FOUND, msg=f'User not found: {username}')
 
     if is_include_password:
         return parse_obj_as(UserDetailsInput, user_details)
@@ -126,7 +127,7 @@ def __get_user_details(request, username, password):
     if result:
         return parse_obj_as(UserDetailsOutput, user_details)
     else:
-        raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED, detail=f'User not matched: {username}')
+        raise_http_exception(status_code=http.HTTPStatus.UNAUTHORIZED, msg=f'User not matched: {username}')
 
 
 def __insert_user_details(request, user_details_input: UserDetailsInput):
@@ -136,8 +137,8 @@ def __insert_user_details(request, user_details_input: UserDetailsInput):
     try:
         mongo_collection.insert_one(jsonable_encoder(user_details_input, exclude_none=True))
     except PyMongoError as ex:
-        raise HTTPException(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-                            detail={'msg': f'Error inserting user: {user_details_input.username}', 'errMsg': str(ex)})
+        raise_http_exception(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
+                             msg=f'Error inserting user: {user_details_input.username}', err_msg=str(ex))
 
 
 def __update_user_details(request, user_details_input: UserDetailsInput):
@@ -152,8 +153,8 @@ def __update_user_details(request, user_details_input: UserDetailsInput):
                                                     {'$set': jsonable_encoder(obj=user_details_input,
                                                                               exclude_none=True)})
         if update_result.modified_count == 0:
-            raise HTTPException(status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
-                                detail=f'Error updating user: {user_details_input.username}')
+            raise_http_exception(status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
+                                 msg=f'Error updating user: {user_details_input.username}')
     except PyMongoError as ex:
-        raise HTTPException(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-                            detail={'msg': f'Error updating user: {user_details_input.username}', 'errMsg': str(ex)})
+        raise_http_exception(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
+                             msg=f'Error updating user: {user_details_input.username}', err_msg=str(ex))

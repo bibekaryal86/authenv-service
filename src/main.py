@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -66,4 +67,4 @@ async def custom_docs_url(req: Request, http_basic_credentials: HTTPBasicCredent
 if __name__ == '__main__':
     port = 8080
     host = '0.0.0.0'
-    uvicorn.run(app, port=port, host='0.0.0.0')
+    uvicorn.run(app, port=port, host='0.0.0.0', log_level=logging.WARNING)

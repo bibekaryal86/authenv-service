@@ -3,12 +3,11 @@ import os
 import random
 from typing import Callable
 
-from fastapi import APIRouter, Request, HTTPException, Response
+from fastapi import APIRouter, Request, Response
 from fastapi.routing import APIRoute
-from fastapi.security import HTTPAuthorizationCredentials
 
 from env_props import EnvDetails, find
-from utils import validate_http_auth_credentials, APP_ENV, GATEWAY_BASE_URLS
+from utils import validate_request_header_auth, APP_ENV, GATEWAY_BASE_URLS, raise_http_exception
 
 
 class GatewayAPIRoute(APIRoute):
@@ -21,12 +20,8 @@ class GatewayAPIRoute(APIRoute):
                 print(
                     '[ {} ] | REQUEST::: Incoming: [ {} ] | Method: [ {} ]'.format(request.state.trace_int, request.url,
                                                                                    request.method))
-                auth_header = request.headers.get('Authorization')
-                access_token = auth_header.split()
-                http_auth_credentials = HTTPAuthorizationCredentials(scheme=access_token[0],
-                                                                     credentials=access_token[1])
-                validate_http_auth_credentials(http_auth_credentials)
-
+                validate_request_header_auth(request.headers.get('Authorization'))
+                # response is logged in __gateway method below
             return await original_route_handler(request)
 
         return log_auth_filter_handler
@@ -85,8 +80,8 @@ def __gateway(request: Request, appname: str, path: str):
     base_url = __base_url(request, appname)
 
     if base_url is None:
-        raise HTTPException(status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
-                            detail=f'Error! Route for {appname} Not Found!! Please Try Again!!!')
+        raise raise_http_exception(status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
+                                   msg=f'Error! Route for {appname} Not Found!! Please Try Again!!!')
 
     query_params = str(request.query_params)
     outgoing_url = base_url + '/' + appname + '/' + path if len(query_params) == 0 \

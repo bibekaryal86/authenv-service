@@ -1,6 +1,6 @@
 import http
 
-from fastapi import APIRouter, Request, HTTPException, Depends
+from fastapi import APIRouter, Request, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
@@ -9,7 +9,7 @@ from pydantic.class_validators import Optional
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 
-from utils import http_bearer_security, validate_http_auth_credentials
+from utils import http_bearer_security, validate_http_auth_credentials, raise_http_exception
 
 router = APIRouter(
     prefix="/authenv-service/env-props",
@@ -70,8 +70,8 @@ def __find_env_details(request, app_name):
             env_details_output.append(env_detail_output)
         return env_details_output
     except PyMongoError as ex:
-        raise HTTPException(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-                            detail={'msg': f'Error retrieving env properties: {app_name}', 'errMsg': str(ex)})
+        raise_http_exception(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
+                             msg=f'Error retrieving env properties: {app_name}', err_msg=str(ex))
 
 
 def __save_env_details(request, app_name, env_detail):
@@ -80,8 +80,8 @@ def __save_env_details(request, app_name, env_detail):
         mongo_collection.insert_one(jsonable_encoder(env_detail, exclude_none=True))
         return __find_env_details(request=request, app_name=app_name)
     except PyMongoError as ex:
-        raise HTTPException(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-                            detail={'msg': f'Error saving env properties: {app_name}', 'errMsg': str(ex)})
+        raise_http_exception(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
+                             msg=f'Error saving env properties: {app_name}', err_msg=str(ex))
 
 
 def __remove_env_details(request, app_name, prop_name):
@@ -89,9 +89,9 @@ def __remove_env_details(request, app_name, prop_name):
     try:
         delete_result = mongo_collection.delete_one({'name': prop_name})
         if delete_result.deleted_count == 0:
-            raise HTTPException(status_code=http.HTTPStatus.NOT_FOUND,
-                                detail={'msg': f'Prop Not Found: {app_name} -- {prop_name}'})
+            raise_http_exception(status_code=http.HTTPStatus.NOT_FOUND,
+                                 msg=f'Prop Not Found: {app_name} -- {prop_name}')
         return __find_env_details(request=request, app_name=app_name)
     except PyMongoError as ex:
-        raise HTTPException(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-                            detail={'msg': f'Error removing env properties: {app_name}', 'errMsg': str(ex)})
+        raise_http_exception(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
+                             msg=f'Error removing env properties: {app_name}', err_msg=str(ex))
