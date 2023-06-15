@@ -80,7 +80,7 @@ def __gateway(request: Request, appname: str, path: str):
     base_url = __base_url(request, appname)
 
     if base_url is None:
-        raise raise_http_exception(status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
+        raise_http_exception(status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
                                    msg=f'Error! Route for {appname} Not Found!! Please Try Again!!!')
 
     query_params = str(request.query_params)
