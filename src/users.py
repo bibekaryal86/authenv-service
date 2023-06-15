@@ -55,7 +55,9 @@ class LoginResponse(BaseModel):
 
 
 @router.post("/login", response_model=LoginResponse, status_code=http.HTTPStatus.OK)
-def login(request: Request, login_request: LoginRequest):
+def login(request: Request, login_request: LoginRequest,
+          http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
+    validate_http_basic_credentials(request, http_basic_credentials)
     user_details = __get_user_details(request=request, username=login_request.username, password=login_request.password)
     token = encode_http_auth_credentials(username=login_request.username, source_ip=request.client.host)
     return LoginResponse(token=token, user_details=user_details)

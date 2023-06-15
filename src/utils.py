@@ -114,17 +114,6 @@ def validate_http_auth_credentials(request: Request, http_auth_credentials: HTTP
                              err_msg=str(ex))
 
 
-def validate_request_header_auth(request: Request):
-    auth_header = request.headers.get('Authorization')
-    if auth_header is None:
-        raise_http_exception(request=request, status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials',
-                             err_msg='Missing Credentials')
-    access_token = auth_header.split()
-    http_auth_credentials = HTTPAuthorizationCredentials(scheme=access_token[0],
-                                                         credentials=access_token[1])
-    validate_http_auth_credentials(request, http_auth_credentials)
-
-
 # other utility functions
 def is_production():
     return os.getenv(APP_ENV) == 'production'
