@@ -7,7 +7,7 @@ from fastapi import APIRouter, Request, Response
 from fastapi.routing import APIRoute
 
 from env_props import EnvDetails, find
-from utils import validate_request_header_auth, APP_ENV, GATEWAY_BASE_URLS, raise_http_exception
+from utils import validate_request_header_auth, APP_ENV, GATEWAY_BASE_URLS, raise_http_exception, get_trace_int
 
 
 class GatewayAPIRoute(APIRoute):
@@ -20,7 +20,7 @@ class GatewayAPIRoute(APIRoute):
                 print(
                     '[ {} ] | REQUEST::: Incoming: [ {} ] | Method: [ {} ]'.format(request.state.trace_int, request.url,
                                                                                    request.method))
-                validate_request_header_auth(request.headers.get('Authorization'))
+                validate_request_header_auth(request)
                 # response is logged in __gateway method below
             return await original_route_handler(request)
 
@@ -80,14 +80,15 @@ def __gateway(request: Request, appname: str, path: str):
     base_url = __base_url(request, appname)
 
     if base_url is None:
-        raise_http_exception(status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
-                                   msg=f'Error! Route for {appname} Not Found!! Please Try Again!!!')
+        raise_http_exception(request=request, status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
+                             msg=f'Error! Route for {appname} Not Found!! Please Try Again!!!')
 
     query_params = str(request.query_params)
     outgoing_url = base_url + '/' + appname + '/' + path if len(query_params) == 0 \
         else base_url + '/' + appname + '/' + path + '?' + query_params
 
-    print('[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]'.format(request.state.trace_int, outgoing_url, 200))
+    print('[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]'.format(get_trace_int(request), outgoing_url,
+                                                                          200))
     return {'gateway': 'successful'}
 
 

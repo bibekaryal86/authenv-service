@@ -64,9 +64,9 @@ def login(request: Request, login_request: LoginRequest):
 @router.post("/{username}", response_model=UserDetailsResponse, status_code=http.HTTPStatus.OK)
 def insert(request: Request, username: str, user_details_request: UserDetailsRequest,
            http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    validate_http_basic_credentials(http_basic_credentials)
+    validate_http_basic_credentials(request, http_basic_credentials)
     if not username == user_details_request.user_details.username or not user_details_request.user_details.password:
-        raise_http_exception(status_code=http.HTTPStatus.BAD_REQUEST,
+        raise_http_exception(request=request, status_code=http.HTTPStatus.BAD_REQUEST,
                              msg='Invalid Request!', err_msg='Invalid User and/or Password!')
 
     __insert_user_details(request=request, user_details_input=user_details_request.user_details)
@@ -76,9 +76,9 @@ def insert(request: Request, username: str, user_details_request: UserDetailsReq
 @router.put("/{username}", response_model=UserDetailsResponse, status_code=http.HTTPStatus.OK)
 def update(request: Request, username: str, user_details_request: UserDetailsRequest,
            http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
-    validate_http_auth_credentials(http_auth_credentials, username)
+    validate_http_auth_credentials(request, http_auth_credentials, username)
     if not username == user_details_request.user_details.username:
-        raise_http_exception(status_code=http.HTTPStatus.BAD_REQUEST,
+        raise_http_exception(request=request, status_code=http.HTTPStatus.BAD_REQUEST,
                              msg='Invalid Request!', err_msg='Invalid Username!')
 
     __update_user_details(request=request, user_details_input=user_details_request.user_details)
@@ -88,7 +88,7 @@ def update(request: Request, username: str, user_details_request: UserDetailsReq
 @router.get("/{username}", response_model=LoginResponse, status_code=http.HTTPStatus.OK)
 def find(request: Request, username: str,
          http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security)):
-    validate_http_auth_credentials(http_auth_credentials, username)
+    validate_http_auth_credentials(request, http_auth_credentials, username)
     user_details = __find_user_by_username(request=request, username=username)
     return LoginResponse(user_details=user_details, token=http_auth_credentials.credentials)
 
@@ -107,11 +107,11 @@ def __find_user_by_username(request, username, is_include_password=False):
     try:
         user_details = mongo_collection.find_one({'username': username})
     except PyMongoError as ex:
-        raise_http_exception(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
+        raise_http_exception(request=request, status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
                              msg=f'Error retrieving user: {username}', err_msg=str(ex))
 
     if user_details is None:
-        raise_http_exception(status_code=http.HTTPStatus.NOT_FOUND, msg=f'User not found: {username}')
+        raise_http_exception(request=request, status_code=http.HTTPStatus.NOT_FOUND, msg=f'User not found: {username}')
 
     if is_include_password:
         return parse_obj_as(UserDetailsInput, user_details)
@@ -127,7 +127,8 @@ def __get_user_details(request, username, password):
     if result:
         return parse_obj_as(UserDetailsOutput, user_details)
     else:
-        raise_http_exception(status_code=http.HTTPStatus.UNAUTHORIZED, msg=f'User not matched: {username}')
+        raise_http_exception(request=request, status_code=http.HTTPStatus.UNAUTHORIZED,
+                             msg=f'User not matched: {username}')
 
 
 def __insert_user_details(request, user_details_input: UserDetailsInput):
@@ -137,7 +138,7 @@ def __insert_user_details(request, user_details_input: UserDetailsInput):
     try:
         mongo_collection.insert_one(jsonable_encoder(user_details_input, exclude_none=True))
     except PyMongoError as ex:
-        raise_http_exception(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
+        raise_http_exception(request=request, status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
                              msg=f'Error inserting user: {user_details_input.username}', err_msg=str(ex))
 
 
@@ -153,8 +154,8 @@ def __update_user_details(request, user_details_input: UserDetailsInput):
                                                     {'$set': jsonable_encoder(obj=user_details_input,
                                                                               exclude_none=True)})
         if update_result.modified_count == 0:
-            raise_http_exception(status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
+            raise_http_exception(request=request, status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
                                  msg=f'Error updating user: {user_details_input.username}')
     except PyMongoError as ex:
-        raise_http_exception(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
+        raise_http_exception(request=request, status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
                              msg=f'Error updating user: {user_details_input.username}', err_msg=str(ex))

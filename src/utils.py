@@ -4,7 +4,7 @@ import secrets
 from datetime import datetime, timedelta
 
 import jwt
-from fastapi import FastAPI, Header
+from fastapi import FastAPI, Request
 from fastapi import HTTPException
 from fastapi.security import HTTPBasic, HTTPBearer, HTTPBasicCredentials, HTTPAuthorizationCredentials
 from jwt import PyJWTError
@@ -74,7 +74,7 @@ http_basic_security = HTTPBasic()  # for main, env_props module
 http_bearer_security = HTTPBearer()  # for users module
 
 
-def validate_http_basic_credentials(http_basic_credentials: HTTPBasicCredentials):
+def validate_http_basic_credentials(request: Request, http_basic_credentials: HTTPBasicCredentials):
     valid_username = os.getenv(BASIC_AUTH_USR)
     valid_password = os.getenv(BASIC_AUTH_PWD)
     input_username = http_basic_credentials.username
@@ -82,7 +82,7 @@ def validate_http_basic_credentials(http_basic_credentials: HTTPBasicCredentials
     is_correct_username = secrets.compare_digest(valid_username.encode('utf-8'), input_username.encode('utf-8'))
     is_correct_password = secrets.compare_digest(valid_password.encode('utf-8'), input_password.encode('utf-8'))
     if not (is_correct_username and is_correct_password):
-        raise_http_exception(status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials',
+        raise_http_exception(request=request, status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials',
                              err_msg='Basic Credentials')
 
 
@@ -95,7 +95,8 @@ def encode_http_auth_credentials(username, source_ip):
     return jwt.encode(payload=token_claim, key=os.getenv(SECRET_KEY), algorithm='HS256')
 
 
-def validate_http_auth_credentials(http_auth_credentials: HTTPAuthorizationCredentials, username: str = None):
+def validate_http_auth_credentials(request: Request, http_auth_credentials: HTTPAuthorizationCredentials,
+                                   username: str = None):
     try:
         token_claims = jwt.decode(jwt=http_auth_credentials.credentials, key=os.getenv(SECRET_KEY),
                                   algorithms=['HS256'])
@@ -106,20 +107,22 @@ def validate_http_auth_credentials(http_auth_credentials: HTTPAuthorizationCrede
         elif username == token_username:
             return token_username
 
-        raise_http_exception(status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials',
+        raise_http_exception(request=request, status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials',
                              err_msg='Bearer Credentials')
     except PyJWTError as ex:
-        raise_http_exception(status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials', err_msg=str(ex))
+        raise_http_exception(request=request, status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials',
+                             err_msg=str(ex))
 
 
-def validate_request_header_auth(auth_header: Header):
+def validate_request_header_auth(request: Request):
+    auth_header = request.headers.get('Authorization')
     if auth_header is None:
-        raise_http_exception(status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials',
+        raise_http_exception(request=request, status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials',
                              err_msg='Missing Credentials')
     access_token = auth_header.split()
     http_auth_credentials = HTTPAuthorizationCredentials(scheme=access_token[0],
                                                          credentials=access_token[1])
-    validate_http_auth_credentials(http_auth_credentials)
+    validate_http_auth_credentials(request, http_auth_credentials)
 
 
 # other utility functions
@@ -127,5 +130,14 @@ def is_production():
     return os.getenv(APP_ENV) == 'production'
 
 
-def raise_http_exception(status_code: http.HTTPStatus, msg: str, err_msg: str = ''):
+def raise_http_exception(request: Request, status_code: http.HTTPStatus, msg: str, err_msg: str = ''):
+    print('[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]'.format(get_trace_int(request), request.url,
+                                                                          status_code))
     raise HTTPException(status_code=status_code, detail={'msg': msg, 'errMsg': err_msg})
+
+
+def get_trace_int(request: Request):
+    try:
+        return request.state.trace_int
+    except AttributeError:
+        return ''

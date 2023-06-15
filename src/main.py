@@ -57,9 +57,10 @@ def tests_reset(request: Request):
 
 
 @app.get("/authenv-service/docs", include_in_schema=False)
-async def custom_docs_url(req: Request, http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    validate_http_basic_credentials(http_basic_credentials)
-    root_path = req.scope.get("root_path", "").rstrip("/")
+async def custom_docs_url(request: Request,
+                          http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
+    validate_http_basic_credentials(request, http_basic_credentials)
+    root_path = request.scope.get("root_path", "").rstrip("/")
     openapi_url = root_path + app.openapi_url
     return get_swagger_ui_html(openapi_url=openapi_url, title=app.title)
 
