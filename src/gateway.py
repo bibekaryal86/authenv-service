@@ -3,6 +3,7 @@ import json
 import os
 import random
 import re
+import time
 from typing import Callable, Optional
 
 import requests
@@ -21,6 +22,7 @@ class GatewayAPIRoute(APIRoute):
         original_route_handler = super().get_route_handler()
 
         async def log_auth_filter_handler(request: Request) -> Response:
+            start_time = time.time()
             request.state.trace_int = random.randint(1000, 9999)
             if request.method != http.HTTPMethod.OPTIONS:
                 print(
@@ -28,7 +30,10 @@ class GatewayAPIRoute(APIRoute):
                                                                                    request.method))
                 validate_request_header_auth(request)
                 # response is logged in __gateway method below
-            return await original_route_handler(request)
+            response = await original_route_handler(request)
+            end_time = time.time() - start_time
+            response.headers["X-Process-Time"] = str(end_time)
+            return response
 
         return log_auth_filter_handler
 
@@ -129,7 +134,12 @@ def __gateway(request: Request, appname: str, path: str, body: dict):
     print('[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]'.format(get_trace_int(request), outgoing_url,
                                                                           response.status_code))
     content = response.json() if response.json() is not None else None
-    return JSONResponse(content=content, status_code=response.status_code)
+    response_headers = dict()
+    for k, v in response.headers.items():
+        # Custom headers typically have an "X-" prefix
+        if 'x-' in k.lower():
+            response_headers[k] = v
+    return JSONResponse(content=content, status_code=response.status_code, headers=response_headers)
 
 
 def __routes_map(request: Request):
