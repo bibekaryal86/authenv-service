@@ -1,4 +1,5 @@
 import logging
+import threading
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -20,6 +21,7 @@ async def lifespan(application: FastAPI):
     utils.startup_db_client(application)
     yield
     utils.shutdown_db_client(application)
+    utils.stop_scheduler()
 
 
 app = FastAPI(
@@ -31,7 +33,6 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None,
 )
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
@@ -39,10 +40,12 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
-
 app.include_router(users_api.router)
 app.include_router(env_props_api.router)
 app.include_router(gateway_api.router)
+
+scheduler_thread = threading.Thread(target=utils.run_scheduler)
+scheduler_thread.start()
 
 
 @app.get('/authenv-service/tests/ping', tags=['Main'], summary='Ping Application')

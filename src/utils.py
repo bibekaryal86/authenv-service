@@ -1,6 +1,8 @@
 import http
 import os
+import sched
 import secrets
+import time
 from datetime import datetime, timedelta
 
 import jwt
@@ -136,6 +138,34 @@ def validate_http_auth_credentials(request: Request, http_auth_credentials: HTTP
     except PyJWTError as ex:
         raise_http_exception(request=request, status_code=http.HTTPStatus.UNAUTHORIZED, msg='Invalid Credentials',
                              err_msg=str(ex))
+
+
+# schedule
+scheduler = sched.scheduler(time.monotonic, time.sleep)
+
+
+def run_scheduler_gateway(sch: sched.scheduler):
+    print('Starting Run Scheduler Gateway')
+    from gateway import set_env_details
+    app = FastAPI()
+    app.mongo_client = __get_mongo_client()
+    request = Request(scope={'type': 'http', 'app': app})
+    set_env_details(request=request, force_reset=True)
+    app.mongo_client.close()
+    scheduler.enter(14400, 1, run_scheduler_gateway, (sch, ))
+
+
+# 14400 = every 4 hours
+def run_scheduler():
+    print('Starting Scheduler!')
+    scheduler.enter(14400, 1, run_scheduler_gateway, (scheduler,))
+    scheduler.run()
+
+
+def stop_scheduler():
+    for event in scheduler.queue:
+        scheduler.cancel(event)
+    print('Stopped Scheduler!')
 
 
 # other utility functions

@@ -53,12 +53,17 @@ auth_configs_cache: dict = {}
 
 def set_env_details(request: Request, force_reset: bool = False):
     if force_reset or len(env_details_cache) == 0:
+        # reset
         auth_configs_cache.clear()
         auth_exclusions_cache.clear()
         routes_map_cache.clear()
         env_details_cache.clear()
         env_details = find(request=request, appname='app_authgateway', is_validate_credentials=False)
+        # set
         env_details_cache.extend(env_detail for env_detail in env_details)
+        __auth_configs(request)
+        __auth_exclusions(request)
+        __routes_map(request)
     return env_details_cache
 
 
