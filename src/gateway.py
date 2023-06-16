@@ -1,10 +1,9 @@
-import asyncio
 import http
 import json
 import os
 import random
 import re
-from typing import Callable
+from typing import Callable, Optional
 
 import requests
 from fastapi import APIRouter, Request, Response
@@ -80,31 +79,31 @@ def gateway_options(appname: str, path: str):
 
 
 @router.get('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
-def gateway_get(request: Request, appname: str, path: str):
-    return __gateway(request=request, appname=appname, path=path)
+def gateway_get(request: Request, appname: str, path: str, body: Optional[dict] = None):
+    return __gateway(request=request, appname=appname, path=path, body=body)
 
 
 @router.post('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
-def gateway_post(request: Request, appname: str, path: str):
-    return __gateway(request=request, appname=appname, path=path)
+def gateway_post(request: Request, appname: str, path: str, body: Optional[dict] = None):
+    return __gateway(request=request, appname=appname, path=path, body=body)
 
 
 @router.put('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
-def gateway_put(request: Request, appname: str, path: str):
-    return __gateway(request=request, appname=appname, path=path)
+def gateway_put(request: Request, appname: str, path: str, body: Optional[dict] = None):
+    return __gateway(request=request, appname=appname, path=path, body=body)
 
 
 @router.patch('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
-def gateway_patch(request: Request, appname: str, path: str):
-    return __gateway(request=request, appname=appname, path=path)
+def gateway_patch(request: Request, appname: str, path: str, body: Optional[dict] = None):
+    return __gateway(request=request, appname=appname, path=path, body=body)
 
 
 @router.delete('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
-def gateway_delete(request: Request, appname: str, path: str):
-    return __gateway(request=request, appname=appname, path=path)
+def gateway_delete(request: Request, appname: str, path: str, body: Optional[dict] = None):
+    return __gateway(request=request, appname=appname, path=path, body=body)
 
 
-def __gateway(request: Request, appname: str, path: str):
+def __gateway(request: Request, appname: str, path: str, body: dict):
     base_url = __base_url(request, appname)
 
     if base_url is None:
@@ -113,14 +112,14 @@ def __gateway(request: Request, appname: str, path: str):
 
     outgoing_url = base_url + '/' + appname + '/' + path
     http_method = request.method
-    request_body = asyncio.run(request.json())
+    request_body = None if body is None else json.dumps(body)
     request_headers = dict()
     for k, v in request.headers.items():
         if k.lower() not in RESTRICTED_HEADERS:
             request_headers[k] = v
 
     response = requests.request(method=http_method, url=outgoing_url, params=request.query_params,
-                                headers=request_headers, auth=__auth_config(request), data=json.dumps(request_body))
+                                headers=request_headers, auth=__auth_config(request), data=request_body)
 
     if response.status_code < 200 or response.status_code > 299:
         raise_http_exception(request=request, status_code=response.status_code,
