@@ -1,4 +1,6 @@
+import asyncio
 import http
+import json
 import os
 import random
 import re
@@ -111,19 +113,19 @@ def __gateway(request: Request, appname: str, path: str):
 
     outgoing_url = base_url + '/' + appname + '/' + path
     http_method = request.method
-
+    request_body = asyncio.run(request.json())
     request_headers = dict()
     for k, v in request.headers.items():
         if k.lower() not in RESTRICTED_HEADERS:
             request_headers[k] = v
 
     response = requests.request(method=http_method, url=outgoing_url, params=request.query_params,
-                                headers=request_headers, auth=__auth_config(request))
+                                headers=request_headers, auth=__auth_config(request), data=json.dumps(request_body))
 
     if response.status_code < 200 or response.status_code > 299:
         raise_http_exception(request=request, status_code=response.status_code,
                              msg='Something went wrong! Please try again!!',
-                             err_msg=str(response.content))
+                             err_msg=response.content.decode())
 
     print('[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]'.format(get_trace_int(request), outgoing_url,
                                                                           response.status_code))
