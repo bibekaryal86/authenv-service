@@ -128,7 +128,8 @@ def __gateway(request: Request, appname: str, path: str, body: dict):
 
     print('[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]'.format(get_trace_int(request), outgoing_url,
                                                                           response.status_code))
-    return JSONResponse(content=response.json())
+    content = response.json() if response.json() is not None else None
+    return JSONResponse(content=content, status_code=response.status_code)
 
 
 def __routes_map(request: Request):
