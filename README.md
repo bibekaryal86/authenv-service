@@ -8,7 +8,7 @@ flake8
 pytest
 tox
 scheduler for set/reset cache
-request headers, request body, response headers
+request body, response headers
 
 # steps
 * navigate to project's root

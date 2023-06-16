@@ -1,4 +1,3 @@
-import base64
 import http
 import os
 import random
@@ -13,7 +12,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 
 from env_props import EnvDetails, find
 from utils import APP_ENV, GATEWAY_BASE_URLS, raise_http_exception, get_trace_int, \
-    GATEWAY_AUTH_EXCLUSIONS, GATEWAY_AUTH_CONFIGS, validate_http_auth_credentials
+    GATEWAY_AUTH_EXCLUSIONS, GATEWAY_AUTH_CONFIGS, validate_http_auth_credentials, RESTRICTED_HEADERS
 
 
 class GatewayAPIRoute(APIRoute):
@@ -121,14 +120,17 @@ def __gateway(request: Request, appname: str, path: str):
     outgoing_url = base_url + '/' + appname + '/' + path
     http_method = request.method
 
-    request_headers = {}
+    request_headers = dict()
     for k, v in request.headers.items():
-        request_headers[k] = v
+        if k.lower() not in RESTRICTED_HEADERS:
+            request_headers[k] = v
 
-    response = requests.request(method=http_method, url=outgoing_url, params=request.query_params)
+    response = requests.request(method=http_method, url=outgoing_url, params=request.query_params,
+                                headers=request_headers, auth=__auth_config(request))
 
     if response is None or response.status_code == http.HTTPStatus.NOT_FOUND:
-        raise_http_exception(request=request, status_code=http.HTTPStatus.NOT_FOUND, msg='NOT FOUND', err_msg='NOT FOUND')
+        raise_http_exception(request=request, status_code=http.HTTPStatus.NOT_FOUND, msg='NOT FOUND',
+                             err_msg='NOT FOUND')
 
     print('[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]'.format(get_trace_int(request), outgoing_url,
                                                                           response.status_code))
@@ -184,8 +186,4 @@ def __auth_config(request: Request):
         password = auth_configs.get(appname_pwd_prop_name)
 
         if username and password:
-            auth = base64.b64encode((username + ':' + password).encode())
-            return (
-                "Authorization".encode(),
-                f"Basic {auth}".encode(),
-            )
+            return username, password

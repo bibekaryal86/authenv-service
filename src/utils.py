@@ -23,6 +23,30 @@ GATEWAY_AUTH_EXCLUSIONS = 'authExclusions'
 GATEWAY_AUTH_CONFIGS = 'authConfigs'
 GATEWAY_ROUTE_PATHS = 'routePaths'
 GATEWAY_BASE_URLS = 'baseUrls_{}'
+# https://github.com/bibekaryal86/pets-gateway-simple/blob/main/app/src/main/java/pets/gateway/app/util/Util.java#L42
+RESTRICTED_HEADERS = ['accept-charset',
+                      'accept-encoding',
+                      'access-control-request-headers',
+                      'access-control-request-method',
+                      'connection',
+                      'content-length',
+                      'cookie',
+                      'cookie2',
+                      'content-transfer-encoding',
+                      'date',
+                      'expect',
+                      'host',
+                      'keep-alive',
+                      'origin',
+                      'referer',
+                      'te',
+                      'trailer',
+                      'transfer-encoding',
+                      'upgrade',
+                      'user-agent',
+                      'via',
+                      'authorization'  # auth is set separately using auth parameter
+                      ]
 
 
 # startup
