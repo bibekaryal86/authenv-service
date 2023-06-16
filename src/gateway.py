@@ -72,14 +72,6 @@ def validate_request_header_auth(request: Request):
     validate_http_auth_credentials(request, http_auth_credentials)
 
 
-def add_app_request_header_auth(request: Request):
-    auth_config = __auth_config(request)
-    if auth_config is None:
-        raise_http_exception(request=request, status_code=http.HTTPStatus.FORBIDDEN, msg='Invalid Credentials',
-                             err_msg='Missing Credentials')
-    return auth_config
-
-
 @router.options('/{appname}/{path:path}', status_code=http.HTTPStatus.OK)
 def gateway_options(appname: str, path: str):
     print(f'Options Request: {appname}/{path}')
@@ -128,9 +120,10 @@ def __gateway(request: Request, appname: str, path: str):
     response = requests.request(method=http_method, url=outgoing_url, params=request.query_params,
                                 headers=request_headers, auth=__auth_config(request))
 
-    if response is None or response.status_code == http.HTTPStatus.NOT_FOUND:
-        raise_http_exception(request=request, status_code=http.HTTPStatus.NOT_FOUND, msg='NOT FOUND',
-                             err_msg='NOT FOUND')
+    if response.status_code < 200 or response.status_code > 299:
+        raise_http_exception(request=request, status_code=response.status_code,
+                             msg='Something went wrong! Please try again!!',
+                             err_msg=str(response.content))
 
     print('[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]'.format(get_trace_int(request), outgoing_url,
                                                                           response.status_code))

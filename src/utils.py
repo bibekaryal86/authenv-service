@@ -143,7 +143,7 @@ def is_production():
     return os.getenv(APP_ENV) == 'production'
 
 
-def raise_http_exception(request: Request, status_code: http.HTTPStatus, msg: str, err_msg: str = ''):
+def raise_http_exception(request: Request, status_code: http.HTTPStatus | int, msg: str, err_msg: str = ''):
     print('[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]'.format(get_trace_int(request), request.url,
                                                                           status_code))
     raise HTTPException(status_code=status_code, detail={'msg': msg, 'errMsg': err_msg})
