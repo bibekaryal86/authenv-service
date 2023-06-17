@@ -9,6 +9,7 @@ pytest
 tox
 black
 logging
+github actions flake8/black/pytest/tox
 
 # steps
 * navigate to project's root
