@@ -1,0 +1,34 @@
+[build-system]
+requires = ['setuptools', 'wheel']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'authenv-service'
+version = '1.0.1'
+description = 'Generic Global Authentication and Environment Properties Service'
+authors = [{name = "Bibek Aryal"}]
+readme = 'README.md'
+requires-python = ">=3.9"
+classifiers = [
+    "License :: Personal Use Only",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+]
+dependencies = [
+    'fastapi',
+    'pymongo',
+    'uvicorn',
+    'pydantic',
+    'bcrypt',
+    'pyjwt',
+    'requests'
+]
+
+# [project.optional-dependencies]
+# pip install '.[test]'.
+
+[project.urls]
+Source = "https://github.com/bibekaryal86/authenv-service"
+
+# [project.scripts]
