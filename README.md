@@ -3,13 +3,14 @@
 Converting https://github.com/bibekaryal86/authenticate-gateway-service to python
 
 
-http://localhost:8080/authenv-service/docs
+# todo
 flake8
 pytest
 tox
 black
 logging
 github actions flake8/black/pytest/tox
+
 
 # steps
 * navigate to project's root
@@ -39,3 +40,5 @@ github actions flake8/black/pytest/tox
     * export BASIC_AUTH_PWD = some-auth-password
 * run main module
   * python src/main.py
+* open swagger
+  * http://localhost:8080/authenv-service/docs
