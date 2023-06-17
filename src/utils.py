@@ -152,7 +152,7 @@ def run_scheduler_gateway(sch: sched.scheduler):
     request = Request(scope={'type': 'http', 'app': app})
     set_env_details(request=request, force_reset=True)
     app.mongo_client.close()
-    scheduler.enter(14400, 1, run_scheduler_gateway, (sch, ))
+    scheduler.enter(14400, 1, run_scheduler_gateway, (sch,))
 
 
 # 14400 = every 4 hours
