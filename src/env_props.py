@@ -1,14 +1,13 @@
 import http
+from typing import Optional
 
 from fastapi import APIRouter, Request, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from pydantic import parse_obj_as
-from pydantic.class_validators import Optional
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
-
 from utils import http_bearer_security, validate_http_auth_credentials, raise_http_exception
 
 router = APIRouter(
@@ -19,13 +18,13 @@ router = APIRouter(
 
 class EnvDetails(BaseModel):
     name: str
-    string_value: Optional[str] = Field(alias='stringValue')
-    list_value: Optional[list] = Field(alias='listValue')
-    map_value: Optional[dict] = Field(alias='mapValue')
+    string_value: Optional[str] = Field(alias='stringValue', default='')
+    list_value: Optional[list] = Field(alias='listValue', default=[])
+    map_value: Optional[dict] = Field(alias='mapValue', default={})
 
 
 class EnvDetailsResponse(BaseModel):
-    msg: Optional[str]
+    msg: Optional[str] = None
 
 
 @router.get("/{appname}", response_model=list[EnvDetails], status_code=http.HTTPStatus.OK)

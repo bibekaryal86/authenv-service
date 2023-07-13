@@ -20,6 +20,7 @@ dependencies = [
     'pymongo',
     'uvicorn',
     'pydantic',
+    'pydantic_settings',
     'bcrypt',
     'pyjwt',
     'requests'
