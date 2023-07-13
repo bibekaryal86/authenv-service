@@ -1,18 +1,16 @@
 import http
 import json
-import os
 import random
 import re
 import time
 from typing import Callable, Optional
 
 import requests
+from env_props import EnvDetails, find
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from fastapi.security import HTTPAuthorizationCredentials
-
-from env_props import EnvDetails, find
 from utils import APP_ENV, GATEWAY_BASE_URLS, raise_http_exception, get_trace_int, \
     GATEWAY_AUTH_EXCLUSIONS, GATEWAY_AUTH_CONFIGS, validate_http_auth_credentials, RESTRICTED_HEADERS
 
@@ -149,7 +147,7 @@ def __gateway(request: Request, appname: str, path: str, body: dict):
 
 def __routes_map(request: Request):
     if len(routes_map_cache) == 0:
-        app_env = os.getenv(APP_ENV)
+        app_env = APP_ENV
         env_details = set_env_details(request=request)
         env_detail_base_urls = list(filter(lambda env_detail: env_detail.name == GATEWAY_BASE_URLS.format(app_env),
                                            env_details))

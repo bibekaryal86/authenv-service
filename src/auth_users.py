@@ -1,4 +1,5 @@
 import http
+from typing import Optional
 
 import bcrypt
 from fastapi import APIRouter, Request, Depends
@@ -6,7 +7,6 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBasicCredentials
 from pydantic import BaseModel, Field
 from pydantic import parse_obj_as
-from pydantic.class_validators import Optional
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 

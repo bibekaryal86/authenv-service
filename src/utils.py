@@ -1,11 +1,11 @@
 import http
-import os
 import sched
 import secrets
 import time
 from datetime import datetime, timedelta
-
+from pydantic_settings import BaseSettings, SettingsConfigDict
 import jwt
+from functools import lru_cache
 from fastapi import FastAPI, Request
 from fastapi import HTTPException
 from fastapi.security import HTTPBasic, HTTPBearer, HTTPBasicCredentials, HTTPAuthorizationCredentials
@@ -13,12 +13,6 @@ from jwt import PyJWTError
 from pymongo import MongoClient
 
 # Constants
-APP_ENV = 'APP_ENV'
-SECRET_KEY = 'SECRET_KEY'
-MONGODB_USR_NAME = 'MONGODB_USR_NAME'
-MONGODB_USR_PWD = 'MONGODB_USR_PWD'
-BASIC_AUTH_USR = 'BASIC_AUTH_USR'
-BASIC_AUTH_PWD = 'BASIC_AUTH_PWD'
 SERVICE_AUTH_USR = '-usr'
 SERVICE_AUTH_PWD = '-pwd'
 GATEWAY_AUTH_EXCLUSIONS = 'authExclusions'
@@ -51,27 +45,45 @@ RESTRICTED_HEADERS = ['accept-charset',
                       ]
 
 
+# ENVIRONMENT VARIABLES
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="allow")
+
+
+@lru_cache()
+def get_settings():
+    return Settings()
+
+
+APP_ENV = get_settings().app_env
+SECRET_KEY = get_settings().secret_key
+MONGODB_USR_NAME = get_settings().mongodb_usr_name
+MONGODB_USR_PWD = get_settings().mongodb_usr_pwd
+BASIC_AUTH_USR = get_settings().basic_auth_usr
+BASIC_AUTH_PWD = get_settings().basic_auth_pwd
+
+
 # startup
 def validate_input():
     missing_variables = []
 
-    if os.getenv(APP_ENV) is None:
-        missing_variables.append(APP_ENV)
+    if APP_ENV is None:
+        missing_variables.append('APP_ENV')
 
-    if os.getenv(SECRET_KEY) is None:
-        missing_variables.append(SECRET_KEY)
+    if SECRET_KEY is None:
+        missing_variables.append('SECRET_KEY')
 
-    if os.getenv(MONGODB_USR_NAME) is None:
-        missing_variables.append(MONGODB_USR_NAME)
+    if MONGODB_USR_NAME is None:
+        missing_variables.append('MONGODB_USR_NAME')
 
-    if os.getenv(MONGODB_USR_PWD) is None:
-        missing_variables.append(MONGODB_USR_PWD)
+    if MONGODB_USR_PWD is None:
+        missing_variables.append('MONGODB_USR_PWD')
 
-    if os.getenv(BASIC_AUTH_USR) is None:
-        missing_variables.append(BASIC_AUTH_USR)
+    if BASIC_AUTH_USR is None:
+        missing_variables.append('BASIC_AUTH_USR')
 
-    if os.getenv(BASIC_AUTH_PWD) is None:
-        missing_variables.append(BASIC_AUTH_PWD)
+    if BASIC_AUTH_PWD is None:
+        missing_variables.append('BASIC_AUTH_PWD')
 
     if len(missing_variables) != 0:
         raise ValueError('The following env variables are missing: {}'.format(missing_variables))
@@ -88,8 +100,8 @@ def shutdown_db_client(app: FastAPI):
 
 
 def __get_mongo_client():
-    user_name = os.getenv(MONGODB_USR_NAME)
-    password = os.getenv(MONGODB_USR_PWD)
+    user_name = MONGODB_USR_NAME
+    password = MONGODB_USR_PWD
     connection_string = 'mongodb+srv://{}:{}@appdetails.bulegrc.mongodb.net/?retryWrites=true&w=majority' \
         .format(user_name, password)
     return MongoClient(connection_string)
@@ -101,8 +113,8 @@ http_bearer_security = HTTPBearer()  # for users module
 
 
 def validate_http_basic_credentials(request: Request, http_basic_credentials: HTTPBasicCredentials):
-    valid_username = os.getenv(BASIC_AUTH_USR)
-    valid_password = os.getenv(BASIC_AUTH_PWD)
+    valid_username = BASIC_AUTH_USR
+    valid_password = BASIC_AUTH_PWD
     input_username = http_basic_credentials.username
     input_password = http_basic_credentials.password
     is_correct_username = secrets.compare_digest(valid_username.encode('utf-8'), input_username.encode('utf-8'))
@@ -118,13 +130,13 @@ def encode_http_auth_credentials(username, source_ip):
         'source_ip': source_ip,
         'exp': datetime.utcnow() + timedelta(hours=24)
     }
-    return jwt.encode(payload=token_claim, key=os.getenv(SECRET_KEY), algorithm='HS256')
+    return jwt.encode(payload=token_claim, key=SECRET_KEY, algorithm='HS256')
 
 
 def validate_http_auth_credentials(request: Request, http_auth_credentials: HTTPAuthorizationCredentials,
                                    username: str = None):
     try:
-        token_claims = jwt.decode(jwt=http_auth_credentials.credentials, key=os.getenv(SECRET_KEY),
+        token_claims = jwt.decode(jwt=http_auth_credentials.credentials, key=SECRET_KEY,
                                   algorithms=['HS256'])
         token_username = token_claims.get('username')
 
@@ -170,7 +182,7 @@ def stop_scheduler():
 
 # other utility functions
 def is_production():
-    return os.getenv(APP_ENV) == 'production'
+    return APP_ENV == 'production'
 
 
 def raise_http_exception(request: Request, status_code: http.HTTPStatus | int, msg: str, err_msg: str = ''):

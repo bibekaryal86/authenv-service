@@ -1,14 +1,13 @@
 import http
+from typing import Optional
 
 from fastapi import APIRouter, Request, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from pydantic import parse_obj_as
-from pydantic.class_validators import Optional
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
-
 from utils import http_bearer_security, validate_http_auth_credentials, raise_http_exception
 
 router = APIRouter(
