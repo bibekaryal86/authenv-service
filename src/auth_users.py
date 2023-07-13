@@ -27,8 +27,8 @@ class UserDetailsOutput(BaseModel):
     email: str
     phone: str
     street_address: Optional[str] = Field(alias='streetAddress')
-    city: Optional[str]
-    state: Optional[str]
+    city: Optional[str] = None
+    state: Optional[str] = None
     zip_code: Optional[str] = Field(alias='zipCode')
 
 

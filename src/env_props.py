@@ -24,7 +24,7 @@ class EnvDetails(BaseModel):
 
 
 class EnvDetailsResponse(BaseModel):
-    msg: Optional[str]
+    msg: Optional[str] = None
 
 
 @router.get("/{appname}", response_model=list[EnvDetails], status_code=http.HTTPStatus.OK)
