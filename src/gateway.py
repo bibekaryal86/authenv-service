@@ -147,9 +147,8 @@ def __gateway(request: Request, appname: str, path: str, body: dict):
 
 def __routes_map(request: Request):
     if len(routes_map_cache) == 0:
-        app_env = APP_ENV
         env_details = set_env_details(request=request)
-        env_detail_base_urls = list(filter(lambda env_detail: env_detail.name == GATEWAY_BASE_URLS.format(app_env),
+        env_detail_base_urls = list(filter(lambda env_detail: env_detail.name == GATEWAY_BASE_URLS.format(APP_ENV),
                                            env_details))
         base_urls = env_detail_base_urls[0].map_value
         for k, v in base_urls.items():
