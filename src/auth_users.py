@@ -26,14 +26,14 @@ class UserDetailsOutput(BaseModel):
     status: str
     email: str
     phone: str
-    street_address: Optional[str] = Field(alias='streetAddress')
+    street_address: Optional[str] = Field(alias='streetAddress', default='')
     city: Optional[str] = None
     state: Optional[str] = None
-    zip_code: Optional[str] = Field(alias='zipCode')
+    zip_code: Optional[str] = Field(alias='zipCode', default='')
 
 
 class UserDetailsInput(UserDetailsOutput):
-    password: Optional[str] = Field(description='Required for insert, Optional for update')
+    password: Optional[str] = Field(description='Required for insert, Optional for update', default='')
 
 
 class UserDetailsRequest(BaseModel):

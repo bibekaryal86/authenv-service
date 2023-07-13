@@ -18,9 +18,9 @@ router = APIRouter(
 
 class EnvDetails(BaseModel):
     name: str
-    string_value: Optional[str] = Field(alias='stringValue')
-    list_value: Optional[list] = Field(alias='listValue')
-    map_value: Optional[dict] = Field(alias='mapValue')
+    string_value: Optional[str] = Field(alias='stringValue', default='')
+    list_value: Optional[list] = Field(alias='listValue', default=[])
+    map_value: Optional[dict] = Field(alias='mapValue', default={})
 
 
 class EnvDetailsResponse(BaseModel):
