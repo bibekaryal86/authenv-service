@@ -10,7 +10,7 @@ tox
 black
 logging
 github actions flake8/black/pytest/tox
-
+docker
 
 # steps
 * navigate to project's root
@@ -23,6 +23,10 @@ github actions flake8/black/pytest/tox
     * venv/Scripts/activate
 * Install requirements
   * pip install .
+* create/update config file
+  * at project root:
+    * cp .env.example .env
+    * update .env with attribute values
 * run main module
   * python src/main.py
 * open swagger
