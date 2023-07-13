@@ -100,10 +100,8 @@ def shutdown_db_client(app: FastAPI):
 
 
 def __get_mongo_client():
-    user_name = MONGODB_USR_NAME
-    password = MONGODB_USR_PWD
     connection_string = 'mongodb+srv://{}:{}@appdetails.bulegrc.mongodb.net/?retryWrites=true&w=majority' \
-        .format(user_name, password)
+        .format(MONGODB_USR_NAME, MONGODB_USR_PWD)
     return MongoClient(connection_string)
 
 
