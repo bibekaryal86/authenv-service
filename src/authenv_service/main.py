@@ -1,4 +1,5 @@
 import logging
+import os
 import threading
 from contextlib import asynccontextmanager
 
@@ -11,7 +12,6 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.security import HTTPBasicCredentials
-from utils import http_basic_security, validate_http_basic_credentials
 
 
 @asynccontextmanager
@@ -60,14 +60,14 @@ def tests_reset(request: Request):
 
 @app.get("/authenv-service/docs", include_in_schema=False)
 async def custom_docs_url(request: Request,
-                          http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security)):
-    validate_http_basic_credentials(request, http_basic_credentials)
+                          http_basic_credentials: HTTPBasicCredentials = Depends(utils.http_basic_security)):
+    utils.validate_http_basic_credentials(request, http_basic_credentials)
     root_path = request.scope.get("root_path", "").rstrip("/")
     openapi_url = root_path + app.openapi_url
     return get_swagger_ui_html(openapi_url=openapi_url, title=app.title)
 
 
 if __name__ == '__main__':
-    port = 8080
+    port = os.getenv(utils.ENV_APP_PORT, '8080')
     host = '0.0.0.0'
-    uvicorn.run(app, port=port, host='0.0.0.0', log_level=logging.WARNING)
+    uvicorn.run(app, port=int(port), host='0.0.0.0', log_level=logging.WARNING)
