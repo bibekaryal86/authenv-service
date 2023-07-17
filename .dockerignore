@@ -1,0 +1,9 @@
+.git
+.idea
+build
+venv
+.dockerignore
+.env.example
+.gitignore
+src/authenv_service.egg-info
+README.md

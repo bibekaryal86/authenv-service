@@ -13,6 +13,7 @@ from jwt import PyJWTError
 from pymongo import MongoClient
 
 # Constants
+ENV_APP_PORT = 'APP_PORT'
 SERVICE_AUTH_USR = '-usr'
 SERVICE_AUTH_PWD = '-pwd'
 GATEWAY_AUTH_EXCLUSIONS = 'authExclusions'

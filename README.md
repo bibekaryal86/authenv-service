@@ -4,13 +4,12 @@ Converting https://github.com/bibekaryal86/authenticate-gateway-service to pytho
 
 
 # todo
-flake8
-pytest
-tox
-black
-logging
-github actions flake8/black/pytest/tox
-docker
+* flake8
+* pytest
+* tox
+* black
+* github actions flake8/black/pytest/tox
+* logging
 
 # steps
 * navigate to project's root
@@ -31,3 +30,8 @@ docker
   * python src/main.py
 * open swagger
   * http://localhost:8080/authenv-service/docs
+
+# notes
+* when running from Pycharm:
+  * script path: <PROJECT_ROOT>\src\authenv_service\main.py
+  * working directory: <PROJECT_ROOT>
