@@ -19,7 +19,7 @@ Converting https://github.com/bibekaryal86/authenticate-gateway-service to pytho
   * Windows (Powershell):
     * venv\Scripts\activate.ps1
   * Unix: 
-    * venv/Scripts/activate
+    * source venv/Scripts/activate
 * Install requirements
   * pip install .
 * create/update config file
@@ -30,6 +30,24 @@ Converting https://github.com/bibekaryal86/authenticate-gateway-service to pytho
   * python src/main.py
 * open swagger
   * http://localhost:8080/authenv-service/docs
+* Setup linters
+  * First install optional dependencies
+    * `pip install '.[lint]' .`
+    * `Flake8-pytest` is required because:
+      * `flake8` doesn't support pyproject.toml
+      * I don't want to maintain another config file
+  * Run the lint commands (check only)
+    * `isort src -c -v`
+    * `isort test -c -v`
+    * `black src --check`
+    * `black test --check`
+    * `flake8 src`
+    * `flake8 test`
+  * To fix lint errors
+    * `isort src`
+    * `isort test`
+    * `black src`
+    * `black test`
 
 # notes
 * when running from Pycharm:
