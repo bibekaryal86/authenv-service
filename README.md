@@ -27,23 +27,27 @@ Converting https://github.com/bibekaryal86/authenticate-gateway-service to pytho
 * open swagger
   * http://localhost:8080/authenv-service/docs
 * Setup linters
-  * First install optional dependencies
+  * Install optional dependencies for lint
     * `pip install '.[lint]' .`
     * `Flake8-pytest` is required because:
       * `flake8` doesn't support pyproject.toml
-      * I don't want to maintain another config file
   * Run the lint commands (check only)
     * `isort src -c -v`
-    * `isort test -c -v`
+    * `isort tests -c -v`
     * `black src --check`
-    * `black test --check`
+    * `black tests --check`
     * `flake8 src`
-    * `flake8 test`
+    * `flake8 tests`
   * To fix lint errors
     * `isort src`
-    * `isort test`
+    * `isort tests`
     * `black src`
-    * `black test`
+    * `black tests`
+* Setup tests
+  * Install optional dependencies for tests
+    * `pip install '.[test]' .`
+  * Run tests
+    * `pytest`
 
 # notes
 * when running from Pycharm:

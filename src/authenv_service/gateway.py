@@ -6,12 +6,13 @@ import time
 from typing import Callable, Optional
 
 import requests
-from env_props import EnvDetails, find
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from fastapi.security import HTTPAuthorizationCredentials
-from utils import (
+
+from authenv_service.env_props import EnvDetails, find
+from authenv_service.utils import (
     APP_ENV,
     GATEWAY_AUTH_CONFIGS,
     GATEWAY_AUTH_EXCLUSIONS,
