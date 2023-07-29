@@ -4,11 +4,7 @@ Converting https://github.com/bibekaryal86/authenticate-gateway-service to pytho
 
 
 # todo
-* flake8
-* pytest
-* tox
-* black
-* github actions flake8/black/pytest/tox
+* github actions flake8/black/pytest
 * logging
 
 # steps
