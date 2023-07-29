@@ -23,7 +23,7 @@ Converting https://github.com/bibekaryal86/authenticate-gateway-service to pytho
     * cp .env.example .env
     * update .env with attribute values
 * run main module
-  * python src/main.py
+  * python src/authenv_service/main.py
 * open swagger
   * http://localhost:8080/authenv-service/docs
 * Setup linters
