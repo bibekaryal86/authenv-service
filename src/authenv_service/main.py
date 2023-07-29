@@ -9,10 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.security import HTTPBasicCredentials
 
-import authenv_service.auth_users as users_api
-import authenv_service.env_props as env_props_api
-import authenv_service.gateway as gateway_api
-import authenv_service.utils as utils
+import auth_users as users_api
+import env_props as env_props_api
+import gateway as gateway_api
+import utils as utils
 
 
 @asynccontextmanager

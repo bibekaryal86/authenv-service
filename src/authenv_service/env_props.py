@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, parse_obj_as
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 
-from authenv_service.utils import (
+from utils import (
     http_bearer_security,
     raise_http_exception,
     validate_http_auth_credentials,
