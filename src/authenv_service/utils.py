@@ -1,5 +1,6 @@
 import datetime
 import http
+import os
 import secrets
 import threading
 import time
@@ -26,10 +27,10 @@ GATEWAY_AUTH_CONFIGS = "authConfigs"
 GATEWAY_ROUTE_PATHS = "routePaths"
 GATEWAY_BASE_URLS = "baseUrls_{}"
 SCHEDULER_ENV_DETAILS_EXECUTE_TIME = [
+    datetime.time(0, 0, 1).strftime("%H:%M:%S"),
     datetime.time(6, 0, 1).strftime("%H:%M:%S"),
     datetime.time(12, 0, 1).strftime("%H:%M:%S"),
-    datetime.time(0, 34, 10).strftime("%H:%M:%S"),
-    datetime.time(0, 0, 1).strftime("%H:%M:%S"),
+    datetime.time(6, 0, 1).strftime("%H:%M:%S"),
 ]
 # https://github.com/bibekaryal86/pets-gateway-simple/blob/main/app/src/main/java/pets/gateway/app/util/Util.java#L42
 RESTRICTED_HEADERS = [
@@ -60,7 +61,10 @@ RESTRICTED_HEADERS = [
 
 # ENVIRONMENT VARIABLES
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="allow")
+    if os.getenv("IS_PYTEST"):
+        model_config = SettingsConfigDict(env_file=".env.example", extra="allow")
+    else:
+        model_config = SettingsConfigDict(env_file=".env", extra="allow")
 
 
 @lru_cache()
@@ -210,7 +214,6 @@ def start_scheduler():
         def run(cls):
             while not stop_event.is_set():
                 current_time = datetime.datetime.now().time().strftime("%H:%M:%S")
-                print(current_time)
                 if current_time in SCHEDULER_ENV_DETAILS_EXECUTE_TIME:
                     run_scheduler_gateway()
                 time.sleep(1)
