@@ -36,6 +36,7 @@ lint = [
 test = [
     'pytest >= 7.4.0',
     'pytest-cov >= 4.1.0',
+    'pytest-env >= 0.8.2'
 ]
 
 [tool.isort]
@@ -55,6 +56,7 @@ testpaths = ['tests']
 pythonpath = [ './src/authenv_service' ]
 addopts = '-ra --cov --cov-report=term' #html
 log_cli = 'True'
+env = [ 'IS_PYTEST = True ']
 
 [project.urls]
 Source = "https://github.com/bibekaryal86/authenv-service"
