@@ -210,7 +210,6 @@ def start_scheduler():
         def run(cls):
             while not stop_event.is_set():
                 current_time = datetime.datetime.now().time().strftime("%H:%M:%S")
-                print(current_time)
                 if current_time in SCHEDULER_ENV_DETAILS_EXECUTE_TIME:
                     run_scheduler_gateway()
                 time.sleep(1)

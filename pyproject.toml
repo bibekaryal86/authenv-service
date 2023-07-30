@@ -52,6 +52,7 @@ extend-ignore = ['E203']
 
 [tool.pytest.ini_options]
 testpaths = ['tests']
+pythonpath = [ './src/authenv_service' ]
 addopts = '-ra --cov --cov-report=term' #html
 log_cli = 'True'
 

@@ -39,3 +39,6 @@ jobs:
         run: |
           flake8 src
           flake8 tests
+      - name: Run tests
+        run: |
+          pytest
