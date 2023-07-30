@@ -1,17 +1,16 @@
 import unittest
 from unittest.mock import patch
-from authenv_service.main import ping, reset
-from starlette.requests import Request
+
+from src.authenv_service.main import ping, reset
+from tests.authenv_service_test.utils_test import dummy_request
 
 
 class MainTest(unittest.TestCase):
-    dummy_request: Request = {}
-
     def test_ping(self):
         self.assertEqual(ping(), {"test": "successful"})
 
-    @patch('authenv_service.main.gateway_api')
+    @patch("src.authenv_service.main.gateway_api")
     def test_reset(self, mock_gateway_api):
-        mock_gateway_api.set_env_details.return_value = 'return value'
-        self.assertEqual(reset(request=self.dummy_request), {"reset": "successful"})
+        mock_gateway_api.set_env_details.return_value = "return value"
+        self.assertEqual(reset(request=dummy_request), {"reset": "successful"})
         assert mock_gateway_api.set_env_details.called
