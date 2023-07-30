@@ -4,7 +4,8 @@ Converting https://github.com/bibekaryal86/authenticate-gateway-service to pytho
 
 
 # todo
-* github actions flake8/black/pytest
+* pytest
+* github actions pytest
 * logging
 
 # steps
@@ -48,6 +49,7 @@ Converting https://github.com/bibekaryal86/authenticate-gateway-service to pytho
     * `pip install '.[test]' .`
   * Run tests
     * `pytest`
+    * this is not working yet, see todo
 
 # notes
 * when running from Pycharm:
