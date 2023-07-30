@@ -46,12 +46,12 @@ app.include_router(gateway_api.router)
 
 
 @app.get("/authenv-service/tests/ping", tags=["Main"], summary="Ping Application")
-def tests_ping():
+def ping():
     return {"test": "successful"}
 
 
 @app.get("/authenv-service/tests/reset", tags=["Main"], summary="Reset Cache")
-def tests_reset(request: Request):
+def reset(request: Request):
     gateway_api.set_env_details(request=request, force_reset=True)
     return {"reset": "successful"}
 
