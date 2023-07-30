@@ -7,7 +7,6 @@ RUN pip install --no-cache-dir --upgrade .
 # instead of `.` use -r requirements.txt if using such
 ENV APP_PORT=8080
 # CMD ["uvicorn", "src.authenv_service.main:app", "--host", "0.0.0.0", "--port", "80"]
-# above command keeps running into module not found error for my local modules
 ENTRYPOINT ["python", "src/authenv_service/main.py"]
 # build as : docker build -t authenv-service .
 # run as : docker run --name authenv-service -e PYTHONUNBUFFERED=1 -p 8080:8080 -d authenv-service

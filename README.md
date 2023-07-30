@@ -4,11 +4,8 @@ Converting https://github.com/bibekaryal86/authenticate-gateway-service to pytho
 
 
 # todo
-* flake8
 * pytest
-* tox
-* black
-* github actions flake8/black/pytest/tox
+* github actions pytest
 * logging
 
 # steps
@@ -19,7 +16,7 @@ Converting https://github.com/bibekaryal86/authenticate-gateway-service to pytho
   * Windows (Powershell):
     * venv\Scripts\activate.ps1
   * Unix: 
-    * venv/Scripts/activate
+    * source venv/Scripts/activate
 * Install requirements
   * pip install .
 * create/update config file
@@ -27,9 +24,32 @@ Converting https://github.com/bibekaryal86/authenticate-gateway-service to pytho
     * cp .env.example .env
     * update .env with attribute values
 * run main module
-  * python src/main.py
+  * python src/authenv_service/main.py
 * open swagger
   * http://localhost:8080/authenv-service/docs
+* Setup linters
+  * Install optional dependencies for lint
+    * `pip install '.[lint]' .`
+    * `Flake8-pytest` is required because:
+      * `flake8` doesn't support pyproject.toml
+  * Run the lint commands (check only)
+    * `isort src -c -v`
+    * `isort tests -c -v`
+    * `black src --check`
+    * `black tests --check`
+    * `flake8 src`
+    * `flake8 tests`
+  * To fix lint errors
+    * `isort src`
+    * `isort tests`
+    * `black src`
+    * `black tests`
+* Setup tests
+  * Install optional dependencies for tests
+    * `pip install '.[test]' .`
+  * Run tests
+    * `pytest`
+    * this is not working yet, see todo
 
 # notes
 * when running from Pycharm:
