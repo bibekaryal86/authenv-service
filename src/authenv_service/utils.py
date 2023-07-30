@@ -1,8 +1,8 @@
+import datetime
 import http
-import sched
 import secrets
+import threading
 import time
-from datetime import datetime, timedelta
 from functools import lru_cache
 
 import jwt
@@ -25,6 +25,12 @@ GATEWAY_AUTH_EXCLUSIONS = "authExclusions"
 GATEWAY_AUTH_CONFIGS = "authConfigs"
 GATEWAY_ROUTE_PATHS = "routePaths"
 GATEWAY_BASE_URLS = "baseUrls_{}"
+SCHEDULER_ENV_DETAILS_EXECUTE_TIME = [
+    datetime.time(6, 0, 1).strftime("%H:%M:%S"),
+    datetime.time(12, 0, 1).strftime("%H:%M:%S"),
+    datetime.time(0, 34, 10).strftime("%H:%M:%S"),
+    datetime.time(0, 0, 1).strftime("%H:%M:%S"),
+]
 # https://github.com/bibekaryal86/pets-gateway-simple/blob/main/app/src/main/java/pets/gateway/app/util/Util.java#L42
 RESTRICTED_HEADERS = [
     "accept-charset",
@@ -147,7 +153,7 @@ def encode_http_auth_credentials(username, source_ip):
     token_claim = {
         "username": username,
         "source_ip": source_ip,
-        "exp": datetime.utcnow() + timedelta(hours=24),
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),
     }
     return jwt.encode(payload=token_claim, key=SECRET_KEY, algorithm="HS256")
 
@@ -183,12 +189,9 @@ def validate_http_auth_credentials(
         )
 
 
-# schedule
-scheduler = sched.scheduler(time.monotonic, time.sleep)
-
-
-def run_scheduler_gateway(sch: sched.scheduler):
-    print("Starting Run Scheduler Gateway")
+# scheduler
+def run_scheduler_gateway():
+    print("Starting Run Scheduler Gateway!")
     from gateway import set_env_details
 
     app = FastAPI()
@@ -196,20 +199,31 @@ def run_scheduler_gateway(sch: sched.scheduler):
     request = Request(scope={"type": "http", "app": app})
     set_env_details(request=request, force_reset=True)
     app.mongo_client.close()
-    scheduler.enter(14400, 1, run_scheduler_gateway, (sch,))
 
 
-# 14400 = every 4 hours
-def run_scheduler():
-    print("Starting Scheduler!")
-    scheduler.enter(14400, 1, run_scheduler_gateway, (scheduler,))
-    scheduler.run()
+def start_scheduler():
+    print("Starting Scheduler Thread!!")
+    stop_event = threading.Event()
+
+    class ScheduleThread(threading.Thread):
+        @classmethod
+        def run(cls):
+            while not stop_event.is_set():
+                current_time = datetime.datetime.now().time().strftime("%H:%M:%S")
+                print(current_time)
+                if current_time in SCHEDULER_ENV_DETAILS_EXECUTE_TIME:
+                    run_scheduler_gateway()
+                time.sleep(1)
+
+    schedule_thread = ScheduleThread()
+    schedule_thread.start()
+    return stop_event, schedule_thread
 
 
-def stop_scheduler():
-    for event in scheduler.queue:
-        scheduler.cancel(event)
-    print("Stopped Scheduler!")
+def stop_scheduler(stop_event: threading.Event, schedule_thread: threading.Thread):
+    stop_event.set()
+    schedule_thread.join()
+    print("Stopped Scheduler Thread!")
 
 
 # other utility functions

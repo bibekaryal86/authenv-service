@@ -1,27 +1,26 @@
 import logging
 import os
-import threading
 from contextlib import asynccontextmanager
 
+import auth_users as users_api
+import env_props as env_props_api
+import gateway as gateway_api
+import utils as utils
 import uvicorn
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.security import HTTPBasicCredentials
 
-import auth_users as users_api
-import env_props as env_props_api
-import gateway as gateway_api
-import utils as utils
-
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     utils.validate_input()
     utils.startup_db_client(application)
+    stop_event, schedule_thread = utils.start_scheduler()
     yield
     utils.shutdown_db_client(application)
-    utils.stop_scheduler()
+    utils.stop_scheduler(stop_event, schedule_thread)
 
 
 app = FastAPI(
@@ -44,9 +43,6 @@ app.add_middleware(
 app.include_router(users_api.router)
 app.include_router(env_props_api.router)
 app.include_router(gateway_api.router)
-
-scheduler_thread = threading.Thread(target=utils.run_scheduler)
-scheduler_thread.start()
 
 
 @app.get("/authenv-service/tests/ping", tags=["Main"], summary="Ping Application")
