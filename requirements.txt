@@ -1,6 +1,3 @@
-# google cloud project, where this app is deployed, needs requirements.txt
-# hence this file is created but not referenced anywhere else
-# when adding a dependency here, make sure to add to pyproject.toml as well
 bcrypt>=4.0.1
 fastapi>=0.100.0
 pydantic>=2.0.2
