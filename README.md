@@ -56,6 +56,4 @@ Deployed to: https://authenv-service.appspot.com/authenv-service/tests/ping in g
 
 # google cloud platform
 * gcp requires requirements.txt file for python applications
-* hence there is duplication of dependency declaration for the time being
-* when adding any dependency add to two places - pyproject.toml and requirements.txt
-* hoping gcp will add support to getting dependencies from pyproject.toml soon
+* hence moved dependencies from pyproject.toml to requirements.txt
