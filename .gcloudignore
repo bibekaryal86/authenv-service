@@ -1,0 +1,14 @@
+.git
+.github
+.idea
+.pytest_cache
+build
+src/authenv_service.egg-info
+tests
+venv
+.coverage
+.dockerignore
+.env.example
+.gitignore
+Dockerfile
+README.md

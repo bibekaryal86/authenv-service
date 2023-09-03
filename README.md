@@ -1,7 +1,7 @@
 # authenv-service
 
 Converting https://github.com/bibekaryal86/authenticate-gateway-service to python
-
+Deployed to: https://authenv-service.appspot.com/authenv-service/tests/ping in google-cloud-platform
 
 # todo
 * tests
@@ -53,3 +53,7 @@ Converting https://github.com/bibekaryal86/authenticate-gateway-service to pytho
 * when running from Pycharm:
   * script path: <PROJECT_ROOT>\src\authenv_service\main.py
   * working directory: <PROJECT_ROOT>
+
+# google cloud platform
+* gcp requires requirements.txt file for python applications
+* hence moved dependencies from pyproject.toml to requirements.txt
