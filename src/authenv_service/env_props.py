@@ -2,7 +2,6 @@ import http
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Request
-from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, parse_obj_as
 from pymongo.collection import Collection
@@ -103,7 +102,11 @@ def __save_env_details(request, app_name, env_detail):
         request=request, app_name=app_name
     )
     try:
-        mongo_collection.insert_one(jsonable_encoder(env_detail, exclude_none=True))
+        document_filter = {"name": env_detail.name}
+        document_value = __get_document_value_for_upsert(env_detail)
+        mongo_collection.update_one(
+            filter=document_filter, update=document_value, upsert=True
+        )
         return __find_env_details(request=request, app_name=app_name)
     except PyMongoError as ex:
         raise_http_exception(
@@ -134,3 +137,16 @@ def __remove_env_details(request, app_name, prop_name):
             msg=f"Error removing env properties: {app_name}",
             err_msg=str(ex),
         )
+
+
+def __get_document_value_for_upsert(env_detail: EnvDetails):
+    document_value = {}
+    document_value_set = {"name": env_detail.name}
+    if env_detail.string_value:
+        document_value_set["stringValue"] = env_detail.string_value
+    if env_detail.list_value:
+        document_value_set["listValue"] = env_detail.list_value
+    if env_detail.map_value:
+        document_value_set["mapValue"] = env_detail.map_value
+    document_value["$set"] = document_value_set
+    return document_value
