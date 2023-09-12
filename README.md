@@ -18,6 +18,9 @@ Deployed to: https://authenv-service.appspot.com/authenv-service/tests/ping in g
     * source venv/Scripts/activate
 * Install requirements
   * pip install .
+  * OR, pip install -r requirements.txt -r requirements-dev.txt
+  * Both options above install all dependencies, including optional for lint/test
+  * In prod (gcp), pip install -r requirements.txt will suffice
 * create/update config file
   * at project root:
     * cp .env.example .env
@@ -28,7 +31,7 @@ Deployed to: https://authenv-service.appspot.com/authenv-service/tests/ping in g
   * http://localhost:8080/authenv-service/docs
 * Setup linters
   * Install optional dependencies for lint
-    * `pip install '.[lint]' .`
+    * `pip install -r requirements-dev.txt`
     * `Flake8-pytest` is required because:
       * `flake8` doesn't support pyproject.toml
   * Run the lint commands (check only)
@@ -45,7 +48,7 @@ Deployed to: https://authenv-service.appspot.com/authenv-service/tests/ping in g
     * `black tests`
 * Setup tests
   * Install optional dependencies for tests
-    * `pip install '.[test]' .`
+    * `pip install -r requirements-dev.txt`
   * Run tests
     * `pytest`
 
