@@ -56,6 +56,14 @@ def reset(request: Request):
     return {"reset": "successful"}
 
 
+@app.get("/authenv-service/tests/log-level", tags=["Main"], summary="Set Log Level")
+def log_level(level: utils.LogLevelOptions):
+    log_level_to_set = logging.getLevelNamesMapping().get(level)
+    utils.log.set_level(log_level_to_set)
+    gateway_api.log.set_level(log_level_to_set)
+    return {"set": "successful"}
+
+
 @app.get("/authenv-service/docs", include_in_schema=False)
 async def custom_docs_url(
     request: Request,

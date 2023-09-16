@@ -5,6 +5,7 @@ import os
 import secrets
 import threading
 import time
+from enum import Enum
 from functools import lru_cache
 
 import jwt
@@ -254,3 +255,9 @@ def get_trace_int(request: Request):
         return request.state.trace_int
     except AttributeError:
         return ""
+
+
+class LogLevelOptions(str, Enum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    ERROR = "ERROR"
