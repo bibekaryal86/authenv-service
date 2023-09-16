@@ -3,7 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials
-from pydantic import BaseModel, Field, parse_obj_as
+from pydantic import BaseModel, Field, TypeAdapter
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 from utils import (
@@ -84,8 +84,9 @@ def __find_env_details(request, app_name):
     env_details_output: list[EnvDetails] = []
     try:
         env_details = mongo_collection.find()
+        env_details_type_adapter = TypeAdapter(EnvDetails)
         for env_detail in env_details:
-            env_detail_output = parse_obj_as(EnvDetails, env_detail)
+            env_detail_output = env_details_type_adapter.validate_python(env_detail)
             env_details_output.append(env_detail_output)
         return env_details_output
     except PyMongoError as ex:

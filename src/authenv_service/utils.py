@@ -1,9 +1,11 @@
 import datetime
 import http
+import logging
 import os
 import secrets
 import threading
 import time
+from enum import Enum
 from functools import lru_cache
 
 import jwt
@@ -15,8 +17,11 @@ from fastapi.security import (
     HTTPBearer,
 )
 from jwt import PyJWTError
+from logger import Logger
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pymongo import MongoClient
+
+log = Logger(logging.getLogger(__name__), __name__)
 
 # Constants
 ENV_APP_PORT = "APP_PORT"
@@ -110,12 +115,12 @@ def validate_input():
 
 def startup_db_client(app: FastAPI):
     app.mongo_client = __get_mongo_client()
-    print("Connected to MongoDb Client!")
+    log.info("Connected to MongoDb Client...")
 
 
 def shutdown_db_client(app: FastAPI):
     app.mongo_client.close()
-    print("Disconnected from MongoDb Client!")
+    log.info("Disconnected from MongoDb Client...")
 
 
 def __get_mongo_client():
@@ -195,7 +200,7 @@ def validate_http_auth_credentials(
 
 # scheduler
 def run_scheduler_gateway():
-    print("Starting Run Scheduler Gateway!")
+    log.info("Starting Run Scheduler Gateway...")
     from gateway import set_env_details
 
     app = FastAPI()
@@ -206,7 +211,7 @@ def run_scheduler_gateway():
 
 
 def start_scheduler():
-    print("Starting Scheduler Thread!!")
+    log.info("Starting Scheduler Thread...")
     stop_event = threading.Event()
 
     class ScheduleThread(threading.Thread):
@@ -226,7 +231,7 @@ def start_scheduler():
 def stop_scheduler(stop_event: threading.Event, schedule_thread: threading.Thread):
     stop_event.set()
     schedule_thread.join()
-    print("Stopped Scheduler Thread!")
+    log.info("Stopped Scheduler Thread...")
 
 
 # other utility functions
@@ -237,10 +242,10 @@ def is_production():
 def raise_http_exception(
     request: Request, status_code: http.HTTPStatus | int, msg: str, err_msg: str = ""
 ):
-    print(
+    log.info(
         "[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]".format(
             get_trace_int(request), request.url, status_code
-        )
+        ),
     )
     raise HTTPException(status_code=status_code, detail={"msg": msg, "errMsg": err_msg})
 
@@ -250,3 +255,9 @@ def get_trace_int(request: Request):
         return request.state.trace_int
     except AttributeError:
         return ""
+
+
+class LogLevelOptions(str, Enum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    ERROR = "ERROR"

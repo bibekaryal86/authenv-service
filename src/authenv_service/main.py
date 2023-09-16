@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 from contextlib import asynccontextmanager
 
 import auth_users as users_api
@@ -11,6 +12,9 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.security import HTTPBasicCredentials
+from logger import Logger
+
+log = Logger(logging.getLogger(__name__), __name__)
 
 
 @asynccontextmanager
@@ -45,6 +49,20 @@ app.include_router(env_props_api.router)
 app.include_router(gateway_api.router)
 
 
+@app.middleware("http")
+async def log_request_response(request: Request, call_next):
+    log.info(f"Receiving [ {request.method} ] URL [ {request.url} ]")
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    log.info(
+        f"Returning [ {request.method} ] Status Code [ {response.status_code} ] "
+        f"URL [ {request.url} ] AFTER [ {format(process_time, '.4f')}ms]"
+    )
+    return response
+
+
 @app.get("/authenv-service/tests/ping", tags=["Main"], summary="Ping Application")
 def ping():
     return {"test": "successful"}
@@ -54,6 +72,15 @@ def ping():
 def reset(request: Request):
     gateway_api.set_env_details(request=request, force_reset=True)
     return {"reset": "successful"}
+
+
+@app.get("/authenv-service/tests/log-level", tags=["Main"], summary="Set Log Level")
+def log_level(level: utils.LogLevelOptions):
+    log_level_to_set = logging.getLevelNamesMapping().get(level)
+    log.set_level(log_level_to_set)
+    utils.log.set_level(log_level_to_set)
+    gateway_api.log.set_level(log_level_to_set)
+    return {"set": "successful"}
 
 
 @app.get("/authenv-service/docs", include_in_schema=False)

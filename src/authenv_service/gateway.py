@@ -1,5 +1,6 @@
 import http
 import json
+import logging
 import random
 import re
 import time
@@ -11,6 +12,7 @@ from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from fastapi.security import HTTPAuthorizationCredentials
+from logger import Logger
 from utils import (
     APP_ENV,
     GATEWAY_AUTH_CONFIGS,
@@ -22,6 +24,8 @@ from utils import (
     validate_http_auth_credentials,
 )
 
+log = Logger(logging.getLogger(__name__), __name__)
+
 
 class GatewayAPIRoute(APIRoute):
     def get_route_handler(self) -> Callable:
@@ -31,10 +35,10 @@ class GatewayAPIRoute(APIRoute):
             start_time = time.time()
             request.state.trace_int = random.randint(1000, 9999)
             if request.method != http.HTTPMethod.OPTIONS:
-                print(
+                log.info(
                     "[ {} ] | REQUEST::: Incoming: [ {} ] | Method: [ {} ]".format(
                         request.state.trace_int, request.url, request.method
-                    )
+                    ),
                 )
                 validate_request_header_auth(request)
                 # response is logged in __gateway method below
@@ -100,7 +104,7 @@ def validate_request_header_auth(request: Request):
 
 @router.options("/{appname}/{path:path}", status_code=http.HTTPStatus.OK)
 def gateway_options(appname: str, path: str):
-    print(f"Options Request: {appname}/{path}")
+    log.debug(f"Options Request: {appname}/{path}")
 
 
 @router.get("/{appname}/{path:path}", status_code=http.HTTPStatus.OK)
@@ -169,10 +173,10 @@ def __gateway(request: Request, appname: str, path: str, body: dict):
             err_msg=response.content.decode(),
         )
 
-    print(
+    log.info(
         "[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]".format(
             get_trace_int(request), outgoing_url, response.status_code
-        )
+        ),
     )
     content = response.json() if response.json() is not None else None
     response_headers = dict()
@@ -247,3 +251,8 @@ def __auth_config(request: Request):
 
         if username and password:
             return username, password
+
+
+def do_something():
+    log.debug("THIS IS DEBUG")
+    log.info("THIS IS INFO")

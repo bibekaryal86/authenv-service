@@ -5,7 +5,7 @@ import bcrypt
 from fastapi import APIRouter, Depends, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBasicCredentials
-from pydantic import BaseModel, Field, parse_obj_as
+from pydantic import BaseModel, Field, TypeAdapter
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 from utils import (
@@ -171,9 +171,9 @@ def __find_user_by_username(request, username, is_include_password=False):
         )
 
     if is_include_password:
-        return parse_obj_as(UserDetailsInput, user_details)
+        return TypeAdapter(UserDetailsInput).validate_python(user_details)
     else:
-        return parse_obj_as(UserDetailsOutput, user_details)
+        return TypeAdapter(UserDetailsOutput).validate_python(user_details)
 
 
 def __get_user_details(request, username, password):
@@ -186,7 +186,7 @@ def __get_user_details(request, username, password):
         hashed_password=user_details.password.encode("utf-8"),
     )
     if result:
-        return parse_obj_as(UserDetailsOutput, user_details)
+        return TypeAdapter(UserDetailsOutput).validate_python(user_details)
     else:
         raise_http_exception(
             request=request,
