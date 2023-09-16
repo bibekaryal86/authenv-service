@@ -5,7 +5,6 @@ Deployed to: https://authenv-service.appspot.com/authenv-service/tests/ping in g
 
 # todo
 * tests
-* logging
 
 # steps
 * navigate to project's root
