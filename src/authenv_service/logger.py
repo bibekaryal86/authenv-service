@@ -14,7 +14,8 @@ class Logger:
         self.handler.setLevel(logging.INFO)
 
         self.formatter = logging.Formatter(
-            f"[%(asctime)s] [authenv-service] [{module_name}] [%(threadName)s] [%(levelname)s] [%(message)s]"
+            f"[%(asctime)s] [authenv-service] [{module_name}] "
+            f"[%(threadName)s] [%(levelname)s] %(message)s"
         )
 
         def converter(timestamp):

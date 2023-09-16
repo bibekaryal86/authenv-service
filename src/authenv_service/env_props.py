@@ -3,7 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials
-from pydantic import BaseModel, Field, parse_obj_as, TypeAdapter
+from pydantic import BaseModel, Field, TypeAdapter
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 from utils import (
