@@ -6,8 +6,8 @@ import pytz
 
 
 class Logger:
-    def __init__(self, module_name):
-        self.logger = logging.getLogger()
+    def __init__(self, logger: logging.Logger, module_name: str):
+        self.logger = logger
         self.logger.setLevel(logging.INFO)
 
         self.handler = logging.StreamHandler(sys.stdout)
@@ -36,3 +36,4 @@ class Logger:
 
     def set_level(self, level):
         self.logger.setLevel(level)
+        self.handler.setLevel(level)

@@ -1,5 +1,6 @@
 import datetime
 import http
+import logging
 import os
 import secrets
 import threading
@@ -19,7 +20,7 @@ from logger import Logger
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pymongo import MongoClient
 
-log = Logger("utils")
+log = Logger(logging.getLogger(__name__), __name__)
 
 # Constants
 ENV_APP_PORT = "APP_PORT"

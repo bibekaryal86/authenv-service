@@ -1,5 +1,6 @@
 import http
 import json
+import logging
 import random
 import re
 import time
@@ -23,7 +24,7 @@ from utils import (
     validate_http_auth_credentials,
 )
 
-log = Logger("gateway")
+log = Logger(logging.getLogger(__name__), __name__)
 
 
 class GatewayAPIRoute(APIRoute):
