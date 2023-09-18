@@ -251,4 +251,3 @@ def __auth_config(request: Request):
 
         if username and password:
             return username, password
-
