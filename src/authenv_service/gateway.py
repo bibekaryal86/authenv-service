@@ -251,8 +251,3 @@ def __auth_config(request: Request):
 
         if username and password:
             return username, password
-
-
-def do_something():
-    log.debug("THIS IS DEBUG")
-    log.info("THIS IS INFO")
