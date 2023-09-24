@@ -171,7 +171,7 @@ def validate_http_auth_credentials(
     request: Request,
     http_auth_credentials: HTTPAuthorizationCredentials,
     username: str = None,
-):
+) -> str:
     try:
         token_claims = jwt.decode(
             jwt=http_auth_credentials.credentials, key=SECRET_KEY, algorithms=["HS256"]

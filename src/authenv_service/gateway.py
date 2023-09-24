@@ -40,7 +40,12 @@ class GatewayAPIRoute(APIRoute):
                         request.state.trace_int, request.url, request.method
                     ),
                 )
-                validate_request_header_auth(request)
+                username = validate_request_header_auth(request)
+                # not the best way to do this, hence try/except
+                try:
+                    request.headers._list.append(("usernameheader".encode("latin-1"), username.encode("latin-1")))
+                except Exception as ex:
+                    log.error(f"ERROR:::When setting request headers...{str(ex)}")
                 # response is logged in __gateway method below
             response = await original_route_handler(request)
             end_time = time.time() - start_time
@@ -81,11 +86,11 @@ def set_env_details(request: Request, force_reset: bool = False):
     return env_details_cache
 
 
-def validate_request_header_auth(request: Request):
+def validate_request_header_auth(request: Request) -> str:
     auth_exclusions = __auth_exclusions(request)
     for auth_exclusion in auth_exclusions:
         if auth_exclusion in str(request.url):
-            return None
+            return 'auth_exclusion'
 
     auth_header = request.headers.get("Authorization")
     if auth_header is None:
@@ -99,7 +104,7 @@ def validate_request_header_auth(request: Request):
     http_auth_credentials = HTTPAuthorizationCredentials(
         scheme=access_token[0], credentials=access_token[1]
     )
-    validate_http_auth_credentials(request, http_auth_credentials)
+    return validate_http_auth_credentials(request, http_auth_credentials)
 
 
 @router.options("/{appname}/{path:path}", status_code=http.HTTPStatus.OK)
