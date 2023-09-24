@@ -43,7 +43,9 @@ class GatewayAPIRoute(APIRoute):
                 username = validate_request_header_auth(request)
                 # not the best way to do this, hence try/except
                 try:
-                    request.headers._list.append(("usernameheader".encode("latin-1"), username.encode("latin-1")))
+                    request.headers._list.append(
+                        ("usernameheader".encode("latin-1"), username.encode("latin-1"))
+                    )
                 except Exception as ex:
                     log.error(f"ERROR:::When setting request headers...{str(ex)}")
                 # response is logged in __gateway method below
@@ -90,7 +92,7 @@ def validate_request_header_auth(request: Request) -> str:
     auth_exclusions = __auth_exclusions(request)
     for auth_exclusion in auth_exclusions:
         if auth_exclusion in str(request.url):
-            return 'auth_exclusion'
+            return "auth_exclusion"
 
     auth_header = request.headers.get("Authorization")
     if auth_header is None:
