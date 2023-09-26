@@ -44,7 +44,7 @@ class GatewayAPIRoute(APIRoute):
                 # not the best way to do this, hence try/except
                 try:
                     request.headers._list.append(
-                        ("usernameheader".encode("latin-1"), username.encode("latin-1"))
+                        ("X-User-Name".encode("latin-1"), username.encode("latin-1"))
                     )
                 except Exception as ex:
                     log.error(f"ERROR:::When setting request headers...{str(ex)}")
