@@ -167,7 +167,8 @@ def __find_user_by_username(request, username, is_include_password=False):
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.NOT_FOUND,
-            msg=f"User not found: {username}",
+            msg="Invalid Request!",
+            err_msg="Matching User and/or Password Not Found!",
         )
 
     if is_include_password:
@@ -191,7 +192,8 @@ def __get_user_details(request, username, password):
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.UNAUTHORIZED,
-            msg=f"User not matched: {username}",
+            msg="Invalid Request!",
+            err_msg="Matching User and/or Password Not Found!",
         )
 
 
@@ -232,7 +234,7 @@ def __update_user_details(request, user_details_input: UserDetailsInput):
             raise_http_exception(
                 request=request,
                 status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
-                msg=f"Error updating user: {user_details_input.username}",
+                msg=f"User Not Updated: {user_details_input.username}",
             )
     except PyMongoError as ex:
         raise_http_exception(
