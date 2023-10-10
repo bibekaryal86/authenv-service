@@ -207,7 +207,9 @@ def __insert_user_details(request, user_details_input: UserDetailsInput):
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-            error=get_err_msg(f"Error inserting user: {user_details_input.username}", str(ex)),
+            error=get_err_msg(
+                f"Error inserting user: {user_details_input.username}", str(ex)
+            ),
         )
 
 
@@ -235,5 +237,7 @@ def __update_user_details(request, user_details_input: UserDetailsInput):
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-            error=get_err_msg(f"Error updating user: {user_details_input.username}", str(ex)),
+            error=get_err_msg(
+                f"Error updating user: {user_details_input.username}", str(ex)
+            ),
         )
