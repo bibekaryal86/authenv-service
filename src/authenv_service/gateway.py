@@ -99,8 +99,7 @@ def validate_request_header_auth(request: Request) -> str:
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.UNAUTHORIZED,
-            msg="Invalid Credentials",
-            err_msg="Missing Credentials",
+            error="Invalid Credentials / Missing Credentials",
         )
     access_token = auth_header.split()
     http_auth_credentials = HTTPAuthorizationCredentials(
@@ -152,7 +151,7 @@ def __gateway(request: Request, appname: str, path: str, body: dict):
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
-            msg=f"Error! Route for {appname} Not Found!! Please Try Again!!!",
+            error=f"Error! Route for {appname} Not Found!! Please Try Again!!!",
         )
 
     outgoing_url = base_url + "/" + appname + "/" + path
@@ -176,8 +175,7 @@ def __gateway(request: Request, appname: str, path: str, body: dict):
         raise_http_exception(
             request=request,
             status_code=response.status_code,
-            msg="Something went wrong! Please try again!!",
-            err_msg=response.content.decode(),
+            error=response.content.decode(),
         )
 
     log.info(

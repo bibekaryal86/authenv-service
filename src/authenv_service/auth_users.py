@@ -10,6 +10,7 @@ from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 from utils import (
     encode_http_auth_credentials,
+    get_err_msg,
     http_basic_security,
     http_bearer_security,
     raise_http_exception,
@@ -95,8 +96,7 @@ def insert(
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.BAD_REQUEST,
-            msg="Invalid Request!",
-            err_msg="Invalid User and/or Password!",
+            error="Invalid Request! / Invalid User and/or Password!",
         )
 
     __insert_user_details(
@@ -119,8 +119,7 @@ def update(
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.BAD_REQUEST,
-            msg="Invalid Request!",
-            err_msg="Invalid Username!",
+            error="Invalid Request! / Invalid Username!",
         )
 
     __update_user_details(
@@ -159,16 +158,14 @@ def __find_user_by_username(request, username, is_include_password=False):
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-            msg=f"Error retrieving user: {username}",
-            err_msg=str(ex),
+            error=get_err_msg(f"Error retrieving user: {username}", str(ex)),
         )
 
     if user_details is None:
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.NOT_FOUND,
-            msg="Invalid Request!",
-            err_msg="Matching User and/or Password Not Found!",
+            error="Invalid Request! / Matching User and/or Password Not Found!",
         )
 
     if is_include_password:
@@ -192,8 +189,7 @@ def __get_user_details(request, username, password):
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.UNAUTHORIZED,
-            msg="Invalid Request!",
-            err_msg="Matching User and/or Password Not Found!",
+            error="Invalid Request! / Matching User and/or Password Not Found!",
         )
 
 
@@ -211,8 +207,7 @@ def __insert_user_details(request, user_details_input: UserDetailsInput):
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-            msg=f"Error inserting user: {user_details_input.username}",
-            err_msg=str(ex),
+            error=get_err_msg(f"Error inserting user: {user_details_input.username}", str(ex)),
         )
 
 
@@ -234,12 +229,11 @@ def __update_user_details(request, user_details_input: UserDetailsInput):
             raise_http_exception(
                 request=request,
                 status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
-                msg=f"User Not Updated: {user_details_input.username}",
+                error=f"User Not Updated: {user_details_input.username}",
             )
     except PyMongoError as ex:
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-            msg=f"Error updating user: {user_details_input.username}",
-            err_msg=str(ex),
+            error=get_err_msg(f"Error updating user: {user_details_input.username}", str(ex)),
         )
