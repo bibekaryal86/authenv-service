@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, TypeAdapter
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 from utils import (
+    get_err_msg,
     http_bearer_security,
     raise_http_exception,
     validate_http_auth_credentials,
@@ -93,8 +94,7 @@ def __find_env_details(request, app_name):
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-            msg=f"Error retrieving env properties: {app_name}",
-            err_msg=str(ex),
+            error=get_err_msg(f"Error retrieving env properties: {app_name}", str(ex)),
         )
 
 
@@ -113,8 +113,7 @@ def __save_env_details(request, app_name, env_detail):
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-            msg=f"Error saving env properties: {app_name}",
-            err_msg=str(ex),
+            error=get_err_msg(f"Error saving env properties: {app_name}", str(ex)),
         )
 
 
@@ -128,15 +127,14 @@ def __remove_env_details(request, app_name, prop_name):
             raise_http_exception(
                 request=request,
                 status_code=http.HTTPStatus.NOT_FOUND,
-                msg=f"Prop Not Found: {app_name} -- {prop_name}",
+                error=f"Prop Not Found: {app_name} -- {prop_name}",
             )
         return __find_env_details(request=request, app_name=app_name)
     except PyMongoError as ex:
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-            msg=f"Error removing env properties: {app_name}",
-            err_msg=str(ex),
+            error=get_err_msg(f"Error removing env properties: {app_name}", str(ex)),
         )
 
 

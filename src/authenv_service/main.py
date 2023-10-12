@@ -95,6 +95,6 @@ async def custom_docs_url(
 
 
 if __name__ == "__main__":
-    port = os.getenv(utils.ENV_APP_PORT, "8080")
+    port = os.getenv(utils.ENV_APP_PORT, "9999")
     host = "0.0.0.0"
     uvicorn.run(app, port=int(port), host="0.0.0.0", log_level=logging.WARNING)

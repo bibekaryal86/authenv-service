@@ -153,8 +153,7 @@ def validate_http_basic_credentials(
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.UNAUTHORIZED,
-            msg="Invalid Credentials",
-            err_msg="Basic Credentials",
+            error="Invalid Credentials / Basic Credentials",
         )
 
 
@@ -165,6 +164,10 @@ def encode_http_auth_credentials(username, source_ip):
         "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),
     }
     return jwt.encode(payload=token_claim, key=SECRET_KEY, algorithm="HS256")
+
+
+def get_err_msg(msg: str, err_msg: str = ""):
+    return msg + "\n" + err_msg
 
 
 def validate_http_auth_credentials(
@@ -186,15 +189,13 @@ def validate_http_auth_credentials(
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.UNAUTHORIZED,
-            msg="Invalid Credentials",
-            err_msg="Bearer Credentials",
+            error="Invalid Credentials / Bearer Credentials",
         )
     except PyJWTError as ex:
         raise_http_exception(
             request=request,
             status_code=http.HTTPStatus.UNAUTHORIZED,
-            msg="Invalid Credentials",
-            err_msg=str(ex),
+            error=get_err_msg("Invalid Credentials", str(ex)),
         )
 
 
@@ -240,14 +241,14 @@ def is_production():
 
 
 def raise_http_exception(
-    request: Request, status_code: http.HTTPStatus | int, msg: str, err_msg: str = ""
+    request: Request, status_code: http.HTTPStatus | int, error: str = ""
 ):
     log.info(
         "[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]".format(
             get_trace_int(request), request.url, status_code
         ),
     )
-    raise HTTPException(status_code=status_code, detail={"msg": msg, "errMsg": err_msg})
+    raise HTTPException(status_code=status_code, detail={"error": error})
 
 
 def get_trace_int(request: Request):
