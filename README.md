@@ -14,7 +14,7 @@ Deployed to: https://authenv-service.appspot.com/authenv-service/tests/ping in g
   * Windows (Powershell):
     * venv\Scripts\activate.ps1
   * Unix: 
-    * source venv/Scripts/activate
+    * source venv/bin/activate
 * Install requirements
   * pip install .
   * OR, pip install -r requirements.txt -r requirements-dev.txt
