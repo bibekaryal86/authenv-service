@@ -171,13 +171,6 @@ def __gateway(request: Request, appname: str, path: str, body: dict):
         data=request_body,
     )
 
-    if response.status_code < 200 or response.status_code > 299:
-        raise_http_exception(
-            request=request,
-            status_code=response.status_code,
-            error=response.content.decode(),
-        )
-
     log.info(
         "[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]".format(
             get_trace_int(request), outgoing_url, response.status_code
