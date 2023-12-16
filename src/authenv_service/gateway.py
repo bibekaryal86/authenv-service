@@ -7,22 +7,20 @@ import time
 from typing import Callable, Optional
 
 import requests
+from constants import (
+    APP_ENV,
+    GATEWAY_AUTH_CONFIGS,
+    GATEWAY_AUTH_EXCLUSIONS,
+    GATEWAY_BASE_URLS,
+    RESTRICTED_HEADERS,
+)
 from env_props import EnvDetails, find
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from fastapi.security import HTTPAuthorizationCredentials
 from logger import Logger
-from utils import (
-    APP_ENV,
-    GATEWAY_AUTH_CONFIGS,
-    GATEWAY_AUTH_EXCLUSIONS,
-    GATEWAY_BASE_URLS,
-    RESTRICTED_HEADERS,
-    get_trace_int,
-    raise_http_exception,
-    validate_http_auth_credentials,
-)
+from utils import get_trace_int, raise_http_exception, validate_http_auth_credentials
 
 log = Logger(logging.getLogger(__name__), __name__)
 

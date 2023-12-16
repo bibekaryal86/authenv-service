@@ -4,6 +4,7 @@ import time
 from contextlib import asynccontextmanager
 
 import auth_users as users_api
+import constants as constants
 import env_props as env_props_api
 import gateway as gateway_api
 import utils as utils
@@ -19,7 +20,7 @@ log = Logger(logging.getLogger(__name__), __name__)
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
-    utils.validate_input()
+    constants.validate_input()
     utils.startup_db_client(application)
     stop_event, schedule_thread = utils.start_scheduler()
     yield
@@ -95,6 +96,5 @@ async def custom_docs_url(
 
 
 if __name__ == "__main__":
-    port = os.getenv(utils.ENV_APP_PORT, "9999")
-    host = "0.0.0.0"
+    port = os.getenv(constants.ENV_APP_PORT, "9999")
     uvicorn.run(app, port=int(port), host="0.0.0.0", log_level=logging.WARNING)

@@ -1,17 +1,35 @@
 import datetime
 import logging
+import os
 import sys
+from logging.handlers import TimedRotatingFileHandler
 
 import pytz
+from constants import REPO_HOME
 
 
 class Logger:
     def __init__(self, logger: logging.Logger, module_name: str):
+        log_file_location = REPO_HOME + "/logs/authenv-service/authenv-service.log"
         self.logger = logger
         self.logger.setLevel(logging.INFO)
 
-        self.handler = logging.StreamHandler(sys.stdout)
-        self.handler.setLevel(logging.INFO)
+        # console logger
+        self.stream_handler = logging.StreamHandler(sys.stdout)
+        self.stream_handler.setLevel(logging.ERROR)
+
+        # file logger
+        log_dir = os.path.dirname(log_file_location)
+        os.makedirs(log_dir, exist_ok=True)
+        self.file_handler = TimedRotatingFileHandler(
+            log_file_location,
+            when="midnight",
+            interval=1,  # Daily rotation
+            backupCount=14,  # Keep logs for 14 days
+            encoding="utf-8",
+            delay=True,
+        )
+        self.file_handler.setLevel(logging.INFO)
 
         self.formatter = logging.Formatter(
             f"[%(asctime)s] [authenv-service] [{module_name}] "
@@ -23,8 +41,11 @@ class Logger:
             return pytz.timezone("America/Denver").localize(dt).timetuple()
 
         self.formatter.converter = converter
-        self.handler.setFormatter(self.formatter)
-        self.logger.addHandler(self.handler)
+        self.stream_handler.setFormatter(self.formatter)
+        self.file_handler.setFormatter(self.formatter)
+
+        self.logger.addHandler(self.stream_handler)
+        self.logger.addHandler(self.file_handler)
 
     def debug(self, msg):
         self.logger.debug(msg)
@@ -37,4 +58,5 @@ class Logger:
 
     def set_level(self, level):
         self.logger.setLevel(level)
-        self.handler.setLevel(level)
+        self.stream_handler.setLevel(level)
+        self.file_handler.setLevel(level)
