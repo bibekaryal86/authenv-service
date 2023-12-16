@@ -13,7 +13,6 @@ GATEWAY_AUTH_CONFIGS = "authConfigs"
 GATEWAY_ROUTE_PATHS = "routePaths"
 GATEWAY_BASE_URLS = "baseUrls_{}"
 SCHEDULER_ENV_DETAILS_EXECUTE_TIME = [
-
     datetime.time(0, 0, 1).strftime("%H:%M:%S"),
     datetime.time(6, 0, 1).strftime("%H:%M:%S"),
     datetime.time(12, 0, 1).strftime("%H:%M:%S"),
