@@ -60,8 +60,8 @@ class Logger:
         self.logger.error(msg)
 
     def set_level(self, level):
-    self.logger.setLevel(level)
-    self.stream_handler.setLevel(level)
-
-    if self.file_handler is not None:
-        self.file_handler.setLevel(level)
+        self.logger.setLevel(level)
+        self.stream_handler.setLevel(level)
+    
+        if self.file_handler is not None:
+            self.file_handler.setLevel(level)
