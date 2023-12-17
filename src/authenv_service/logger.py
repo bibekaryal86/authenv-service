@@ -39,7 +39,7 @@ class Logger:
             self.file_handler = TimedRotatingFileHandler(
                 log_file_location,
                 when="midnight",
-                interval=1,      # Daily rotation
+                interval=1,  # Daily rotation
                 backupCount=14,  # Keep logs for 14 days
                 encoding="utf-8",
                 delay=True,
@@ -62,6 +62,6 @@ class Logger:
     def set_level(self, level):
         self.logger.setLevel(level)
         self.stream_handler.setLevel(level)
-    
+
         if self.file_handler is not None:
             self.file_handler.setLevel(level)
