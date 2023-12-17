@@ -33,7 +33,7 @@ class Logger:
 
         # file logger
         if REPO_HOME is not None:
-            log_file_location = REPO_HOME + "/logs/trackcase-service/trackcase-service.log"
+            log_file_location = REPO_HOME + "/logs/authenv-service/authenv-service.log"
             log_dir = os.path.dirname(log_file_location)
             os.makedirs(log_dir, exist_ok=True)
             self.file_handler = TimedRotatingFileHandler(
