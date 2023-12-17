@@ -32,7 +32,7 @@ class Logger:
         self.logger.addHandler(self.stream_handler)
 
         # file logger
-        if REPO_HOME is not None:
+        if REPO_HOME is not None and str(REPO_HOME).strip() != "":
             log_file_location = REPO_HOME + "/logs/authenv-service/authenv-service.log"
             log_dir = os.path.dirname(log_file_location)
             os.makedirs(log_dir, exist_ok=True)
