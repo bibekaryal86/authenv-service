@@ -89,8 +89,8 @@ def validate_input():
     if BASIC_AUTH_PWD is None:
         missing_variables.append("BASIC_AUTH_PWD")
 
-    if REPO_HOME is None:
-        missing_variables.append("REPO_HOME")
+    # if REPO_HOME is None:
+        # missing_variables.append("REPO_HOME")
 
     if len(missing_variables) != 0:
         raise ValueError(
