@@ -10,7 +10,6 @@ from constants import REPO_HOME
 
 class Logger:
     def __init__(self, logger: logging.Logger, module_name: str):
-        log_file_location = REPO_HOME + "/logs/authenv-service/authenv-service.log"
         self.logger = logger
         self.logger.setLevel(logging.INFO)
 
