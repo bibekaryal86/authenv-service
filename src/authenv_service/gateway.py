@@ -7,11 +7,6 @@ import time
 from typing import Callable, Optional
 
 import requests
-from fastapi import APIRouter, HTTPException, Request, Response
-from fastapi.responses import JSONResponse
-from fastapi.routing import APIRoute
-from fastapi.security import HTTPAuthorizationCredentials
-
 from constants import (
     APP_ENV,
     GATEWAY_AUTH_CONFIGS,
@@ -20,6 +15,10 @@ from constants import (
     RESTRICTED_HEADERS,
 )
 from env_props import EnvDetails, find_internal
+from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
+from fastapi.security import HTTPAuthorizationCredentials
 from logger import Logger
 from utils import get_trace_int, raise_http_exception, validate_http_auth_credentials
 

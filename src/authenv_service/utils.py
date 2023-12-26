@@ -6,6 +6,7 @@ import threading
 import time
 from enum import Enum
 
+import constants
 import jwt
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.security import (
@@ -15,10 +16,8 @@ from fastapi.security import (
     HTTPBearer,
 )
 from jwt import PyJWTError
-from pymongo import MongoClient
-
-import constants
 from logger import Logger
+from pymongo import MongoClient
 
 log = Logger(logging.getLogger(__name__), __name__)
 

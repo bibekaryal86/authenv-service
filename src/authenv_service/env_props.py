@@ -6,7 +6,6 @@ from fastapi.security import HTTPBasicCredentials
 from pydantic import BaseModel, Field, TypeAdapter
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
-
 from utils import (
     get_err_msg,
     http_basic_security,
