@@ -126,6 +126,8 @@ def run_scheduler_gateway():
 
 def start_scheduler():
     log.info("Starting Scheduler Thread...")
+    # run scheduler gateway to set cache for the first time
+    run_scheduler_gateway()
     stop_event = threading.Event()
 
     class ScheduleThread(threading.Thread):
