@@ -6,7 +6,6 @@ import threading
 import time
 from enum import Enum
 
-import constants
 import jwt
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.security import (
@@ -16,8 +15,10 @@ from fastapi.security import (
     HTTPBearer,
 )
 from jwt import PyJWTError
-from logger import Logger
 from pymongo import MongoClient
+
+import constants
+from logger import Logger
 
 log = Logger(logging.getLogger(__name__), __name__)
 
@@ -126,6 +127,8 @@ def run_scheduler_gateway():
 
 def start_scheduler():
     log.info("Starting Scheduler Thread...")
+    # run scheduler gateway to set cache for the first time
+    run_scheduler_gateway()
     stop_event = threading.Event()
 
     class ScheduleThread(threading.Thread):

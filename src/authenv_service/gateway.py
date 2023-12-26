@@ -7,6 +7,11 @@ import time
 from typing import Callable, Optional
 
 import requests
+from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
+from fastapi.security import HTTPAuthorizationCredentials
+
 from constants import (
     APP_ENV,
     GATEWAY_AUTH_CONFIGS,
@@ -14,11 +19,7 @@ from constants import (
     GATEWAY_BASE_URLS,
     RESTRICTED_HEADERS,
 )
-from env_props import EnvDetails, find
-from fastapi import APIRouter, Request, Response
-from fastapi.responses import JSONResponse
-from fastapi.routing import APIRoute
-from fastapi.security import HTTPAuthorizationCredentials
+from env_props import EnvDetails, find_internal
 from logger import Logger
 from utils import get_trace_int, raise_http_exception, validate_http_auth_credentials
 
@@ -38,14 +39,7 @@ class GatewayAPIRoute(APIRoute):
                         request.state.trace_int, request.url, request.method
                     ),
                 )
-                username = validate_request_header_auth(request)
-                # not the best way to do this, hence try/except
-                try:
-                    request.headers._list.append(
-                        ("X-User-Name".encode("latin-1"), username.encode("latin-1"))
-                    )
-                except Exception as ex:
-                    log.error(f"ERROR:::When setting request headers...{str(ex)}")
+                validate_request_header_auth(request)
                 # response is logged in __gateway method below
             response = await original_route_handler(request)
             end_time = time.time() - start_time
@@ -75,9 +69,7 @@ def set_env_details(request: Request, force_reset: bool = False):
         auth_exclusions_cache.clear()
         routes_map_cache.clear()
         env_details_cache.clear()
-        env_details = find(
-            request=request, appname="app_authgateway", is_validate_credentials=False
-        )
+        env_details = find_internal(request=request, appname="app_authgateway")
         # set
         env_details_cache.extend(env_detail for env_detail in env_details)
         __auth_configs(request)
@@ -160,29 +152,38 @@ def __gateway(request: Request, appname: str, path: str, body: dict):
         if k.lower() not in RESTRICTED_HEADERS:
             request_headers[k] = v
 
-    response = requests.request(
-        method=http_method,
-        url=outgoing_url,
-        params=request.query_params,
-        headers=request_headers,
-        auth=__auth_config(request),
-        data=request_body,
-    )
-
-    log.info(
-        "[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]".format(
-            get_trace_int(request), outgoing_url, response.status_code
-        ),
-    )
-    content = response.json() if response.json() is not None else None
-    response_headers = dict()
-    for k, v in response.headers.items():
-        # Custom headers typically have an "X-" prefix
-        if "x-" in k.lower():
-            response_headers[k] = v
-    return JSONResponse(
-        content=content, status_code=response.status_code, headers=response_headers
-    )
+    try:
+        response = requests.request(
+            method=http_method,
+            url=outgoing_url,
+            params=request.query_params,
+            headers=request_headers,
+            auth=__auth_config(request),
+            data=request_body,
+        )
+        log.info(
+            "[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]".format(
+                get_trace_int(request), outgoing_url, response.status_code
+            ),
+        )
+        content = None if response.json() is None else response.json()
+        response_headers = dict()
+        for k, v in response.headers.items():
+            # Custom headers typically have an "X-" prefix
+            if "x-" in k.lower():
+                response_headers[k] = v
+        return JSONResponse(
+            content=content, status_code=response.status_code, headers=response_headers
+        )
+    except Exception as ex:
+        log.info(
+            "[ {} ] | CONNECTION_ERROR::: Outgoing: [ {} ]---[{}]".format(
+                get_trace_int(request), outgoing_url, str(ex)
+            ),
+        )
+        raise HTTPException(
+            status_code=http.HTTPStatus.BAD_GATEWAY, detail={"error": str(ex)}
+        )
 
 
 def __routes_map(request: Request):

@@ -2,15 +2,16 @@ import http
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Request
-from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.security import HTTPBasicCredentials
 from pydantic import BaseModel, Field, TypeAdapter
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
+
 from utils import (
     get_err_msg,
-    http_bearer_security,
+    http_basic_security,
     raise_http_exception,
-    validate_http_auth_credentials,
+    validate_http_basic_credentials,
 )
 
 router = APIRouter(prefix="/authenv-service/env-props", tags=["Env Properties"])
@@ -33,11 +34,16 @@ class EnvDetailsResponse(BaseModel):
 def find(
     request: Request,
     appname: str,
-    http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security),
-    is_validate_credentials: bool = True,
+    http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security),
 ):
-    if is_validate_credentials:
-        validate_http_auth_credentials(request, http_auth_credentials)
+    validate_http_basic_credentials(request, http_basic_credentials)
+    return __find_env_details(request, app_name=appname)
+
+
+def find_internal(
+    request: Request,
+    appname: str,
+):
     return __find_env_details(request, app_name=appname)
 
 
@@ -48,9 +54,9 @@ def save(
     request: Request,
     appname: str,
     env_detail: EnvDetails,
-    http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security),
+    http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security),
 ):
-    validate_http_auth_credentials(request, http_auth_credentials)
+    validate_http_basic_credentials(request, http_basic_credentials)
     __save_env_details(request=request, app_name=appname, env_detail=env_detail)
     return EnvDetailsResponse(msg="Saved Successfully!")
 
@@ -64,9 +70,9 @@ def remove(
     request: Request,
     appname: str,
     propname: str,
-    http_auth_credentials: HTTPAuthorizationCredentials = Depends(http_bearer_security),
+    http_basic_credentials: HTTPBasicCredentials = Depends(http_basic_security),
 ):
-    validate_http_auth_credentials(request, http_auth_credentials)
+    validate_http_basic_credentials(request, http_basic_credentials)
     __remove_env_details(request=request, app_name=appname, prop_name=propname)
     return EnvDetailsResponse(msg="Removed Successfully")
 
