@@ -15,7 +15,7 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.security import HTTPBasicCredentials
 from logger import Logger
 
-log = Logger(logging.getLogger(__name__), __name__)
+log = Logger(logging.getLogger(__name__))
 
 
 @asynccontextmanager
@@ -56,7 +56,7 @@ async def log_request_response(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
-    response.headers["X-Process-Time"] = str(process_time)
+    response.headers["x-process-time"] = str(process_time)
     log.info(
         f"Returning [ {request.method} ] Status Code [ {response.status_code} ] "
         f"URL [ {request.url} ] AFTER [ {format(process_time, '.4f')}ms]"

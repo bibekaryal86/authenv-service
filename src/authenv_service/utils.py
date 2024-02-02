@@ -19,7 +19,7 @@ from jwt import PyJWTError
 from logger import Logger
 from pymongo import MongoClient
 
-log = Logger(logging.getLogger(__name__), __name__)
+log = Logger(logging.getLogger(__name__))
 
 
 def startup_db_client(app: FastAPI):
@@ -159,9 +159,8 @@ def raise_http_exception(
     request: Request, status_code: http.HTTPStatus | int, error: str = ""
 ):
     log.info(
-        "[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]".format(
-            get_trace_int(request), request.url, status_code
-        ),
+        f"[ {get_trace_int(request)} ] | RESPONSE::: Outgoing: [ {request.url} ] "
+        f"| Status: [ {status_code} ]"
     )
     raise HTTPException(status_code=status_code, detail={"error": error})
 
