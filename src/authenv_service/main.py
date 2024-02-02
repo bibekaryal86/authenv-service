@@ -3,17 +3,16 @@ import os
 import time
 from contextlib import asynccontextmanager
 
-import uvicorn
-from fastapi import Depends, FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.security import HTTPBasicCredentials
-
 import auth_users as users_api
 import constants as constants
 import env_props as env_props_api
 import gateway as gateway_api
 import utils as utils
+import uvicorn
+from fastapi import Depends, FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.security import HTTPBasicCredentials
 from logger import Logger
 
 log = Logger(logging.getLogger(__name__))

@@ -5,7 +5,6 @@ import sys
 from logging.handlers import TimedRotatingFileHandler
 
 import pytz
-
 from constants import REPO_HOME
 
 
