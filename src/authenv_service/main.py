@@ -3,19 +3,20 @@ import os
 import time
 from contextlib import asynccontextmanager
 
-import auth_users as users_api
-import constants as constants
-import env_props as env_props_api
-import gateway as gateway_api
-import utils as utils
 import uvicorn
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.security import HTTPBasicCredentials
+
+import auth_users as users_api
+import constants as constants
+import env_props as env_props_api
+import gateway as gateway_api
+import utils as utils
 from logger import Logger
 
-log = Logger(logging.getLogger(__name__), __name__)
+log = Logger(logging.getLogger(__name__))
 
 
 @asynccontextmanager
@@ -56,7 +57,7 @@ async def log_request_response(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
-    response.headers["X-Process-Time"] = str(process_time)
+    response.headers["x-process-time"] = str(process_time)
     log.info(
         f"Returning [ {request.method} ] Status Code [ {response.status_code} ] "
         f"URL [ {request.url} ] AFTER [ {format(process_time, '.4f')}ms]"

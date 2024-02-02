@@ -7,6 +7,11 @@ import time
 from typing import Callable, Optional
 
 import requests
+from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
+from fastapi.security import HTTPAuthorizationCredentials
+
 from constants import (
     APP_ENV,
     GATEWAY_AUTH_CONFIGS,
@@ -15,14 +20,10 @@ from constants import (
     RESTRICTED_HEADERS,
 )
 from env_props import EnvDetails, find_internal
-from fastapi import APIRouter, HTTPException, Request, Response
-from fastapi.responses import JSONResponse
-from fastapi.routing import APIRoute
-from fastapi.security import HTTPAuthorizationCredentials
 from logger import Logger
 from utils import get_trace_int, raise_http_exception, validate_http_auth_credentials
 
-log = Logger(logging.getLogger(__name__), __name__)
+log = Logger(logging.getLogger(__name__))
 
 
 class GatewayAPIRoute(APIRoute):
@@ -34,15 +35,14 @@ class GatewayAPIRoute(APIRoute):
             request.state.trace_int = random.randint(1000, 9999)
             if request.method != http.HTTPMethod.OPTIONS:
                 log.info(
-                    "[ {} ] | REQUEST::: Incoming: [ {} ] | Method: [ {} ]".format(
-                        request.state.trace_int, request.url, request.method
-                    ),
+                    f"[ {request.state.trace_int} ] | REQUEST::: Incoming: "
+                    f"[ {request.url} ] | Method: [ {request.method} ]"
                 )
                 validate_request_header_auth(request)
                 # response is logged in __gateway method below
             response = await original_route_handler(request)
             end_time = time.time() - start_time
-            response.headers["X-Process-Time"] = str(end_time)
+            response.headers["x-process-time"] = str(end_time)
             return response
 
         return log_auth_filter_handler
@@ -161,9 +161,8 @@ def __gateway(request: Request, appname: str, path: str, body: dict):
             data=request_body,
         )
         log.info(
-            "[ {} ] | RESPONSE::: Outgoing: [ {} ] | Status: [ {} ]".format(
-                get_trace_int(request), outgoing_url, response.status_code
-            ),
+            f"[ {get_trace_int(request)} ] | RESPONSE::: Outgoing: [ {outgoing_url} ] "
+            f"| Status: [ {response.status_code} ]"
         )
         content = None if response.json() is None else response.json()
         response_headers = dict()
@@ -175,10 +174,10 @@ def __gateway(request: Request, appname: str, path: str, body: dict):
             content=content, status_code=response.status_code, headers=response_headers
         )
     except Exception as ex:
-        log.info(
-            "[ {} ] | CONNECTION_ERROR::: Outgoing: [ {} ]---[{}]".format(
-                get_trace_int(request), outgoing_url, str(ex)
-            ),
+        log.error(
+            f"[ {get_trace_int(request)} ] | CONNECTION_ERROR::: "
+            f"Outgoing: [ {outgoing_url} ]",
+            extra=ex,
         )
         raise HTTPException(
             status_code=http.HTTPStatus.BAD_GATEWAY, detail={"error": str(ex)}
