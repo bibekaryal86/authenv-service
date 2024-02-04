@@ -1,5 +1,5 @@
 bcrypt==4.1.2
-fastapi==0.109.0
+fastapi==0.109.1
 pydantic==2.6.0
 pydantic_settings==2.1.0
 pyjwt==2.8.0
