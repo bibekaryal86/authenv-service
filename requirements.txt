@@ -3,7 +3,7 @@ fastapi==0.111.0
 pydantic==2.7.4
 pydantic_settings==2.3.4
 pyjwt==2.8.0
-pymongo==4.7.3
+pymongo==4.8.0
 pytz==2024.1
 requests==2.32.3
 uvicorn==0.30.1
