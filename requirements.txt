@@ -6,4 +6,4 @@ pyjwt==2.9.0
 pymongo==4.8.0
 pytz==2024.1
 requests==2.32.3
-uvicorn==0.30.5
+uvicorn==0.30.6
