@@ -1,6 +1,6 @@
 bcrypt==4.2.0
 fastapi==0.114.0
-pydantic==2.9.0
+pydantic==2.9.1
 pydantic_settings==2.4.0
 pyjwt==2.9.0
 pymongo==4.8.0
